@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AAM Arm Care Manual</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
+#gate { position: fixed; inset: 0; background: #0F1E35; display: flex; align-items: center; justify-content: center; z-index: 999; }
+.gate-box { background: #1A2F4E; border-top: 4px solid #C9A84C; padding: 40px; width: min(400px, 90vw); text-align: center; border-radius: 4px; }
+.gate-org { color: #C9A84C; font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px; }
+.gate-title { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+.gate-sub { color: #8A9BB0; font-size: 13px; font-style: italic; margin-bottom: 28px; }
+.gate-label { display: block; text-align: left; color: #8A9BB0; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+.gate-input { width: 100%; background: rgba(255,255,255,0.08); border: 2px solid #2A4568; color: #fff; font-size: 20px; letter-spacing: 6px; padding: 12px; text-align: center; border-radius: 3px; margin-bottom: 14px; outline: none; }
+.gate-input:focus { border-color: #C9A84C; }
+.gate-btn { width: 100%; background: #C9A84C; color: #0F1E35; border: none; font-weight: 700; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; padding: 14px; border-radius: 3px; cursor: pointer; }
+.gate-btn:hover { background: #E4C97A; }
+.gate-err { color: #F08070; font-size: 13px; margin-top: 10px; min-height: 18px; }
+.gate-footer { color: #3A5A7A; font-size: 11px; margin-top: 18px; }
+#app { display: none; min-height: 100vh; background: #F5F4F0; }
+.topbar { background: #0F1E35; padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.topbar-left { display: flex; align-items: center; gap: 12px; }
+.menu-btn { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; display: none; }
+.home-btn { background: none; border: 1px solid #2A4568; color: #C9A84C; font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 3px; cursor: pointer; font-family: Arial, sans-serif; }
+.page-title { color: #fff; font-size: 17px; font-weight: 700; }
+.topbar-right { color: #4A6A8A; font-size: 11px; text-align: right; }
+.layout { display: flex; min-height: calc(100vh - 56px); }
+#sidebar { width: 240px; background: #0F1E35; flex-shrink: 0; overflow-y: auto; }
+.nav-section { padding: 12px 0 4px; }
+.nav-label { color: #2A4A6A; font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 0 16px; margin-bottom: 4px; }
+.nav-item { display: flex; align-items: center; gap: 8px; padding: 8px 16px; color: #7A9AB5; font-size: 13px; cursor: pointer; border-left: 3px solid transparent; }
+.nav-item:hover { color: #fff; background: rgba(255,255,255,0.05); }
+.nav-item.active { color: #C9A84C; border-left-color: #C9A84C; background: rgba(201,168,76,0.08); }
+.content { flex: 1; padding: 32px 36px; background: #F5F4F0; color: #1C1C1E; }
+.section { display: none; }
+.section.active { display: block; }
+.section h1 { font-size: 28px; color: #0F1E35; margin-bottom: 8px; }
+.section p { font-size: 15px; line-height: 1.75; color: #1C1C1E; margin-bottom: 14px; }
+.gold-bar { height: 2px; background: linear-gradient(to right, #C9A84C, transparent); margin-bottom: 24px; }
+.home-hero { background: #0F1E35; padding: 40px 36px; }
+.home-hero h1 { color: #fff; font-size: 32px; margin-bottom: 8px; }
+.home-hero p { color: #7A9AB5; font-size: 14px; font-style: italic; margin: 0; }
+.home-bar { height: 3px; background: linear-gradient(to right, #C9A84C, transparent); margin-top: 24px; }
+.home-group-label { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #7A7A85; padding: 20px 36px 10px; }
+.home-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; padding: 0 36px 20px; }
+.home-card { background: #fff; border: 1px solid #E8E4DC; border-top: 3px solid transparent; border-radius: 6px; padding: 18px; cursor: pointer; }
+.home-card:hover { border-top-color: #C9A84C; }
+.home-card .icon { font-size: 24px; margin-bottom: 8px; }
+.home-card .name { font-size: 14px; font-weight: 700; color: #0F1E35; margin-bottom: 4px; }
+.home-card .desc { font-size: 12px; color: #7A7A85; line-height: 1.5; }
+.home-card .tag { font-size: 10px; font-weight: 700; color: #C9A84C; margin-top: 8px; text-transform: uppercase; }
+@media (max-width: 700px) {
+  #sidebar { display: none; position: fixed; top: 56px; left: 0; bottom: 0; z-index: 200; width: 240px; }
+  #sidebar.open { display: block; }
+  .menu-btn { display: block; }
+  .content { padding: 20px 16px; }
+  .home-grid { grid-template-columns: repeat(2, 1fr); padding: 0 16px 16px; }
+  .home-hero { padding: 28px 16px; }
+  .home-group-label { padding: 16px 16px 8px; }
+}
+</style>
+</head>
+<body>
+<div id="gate">
+  <div class="gate-box">
+    <div class="gate-org">Advanced Athletic Medicine</div>
+    <div class="gate-title">Arm Care Manual</div>
+    <div class="gate-sub">Evidence-Based Standards for the Throwing Athlete</div>
+    <label class="gate-label">Access Code</label>
+    <input type="password" class="gate-input" id="codeInput" placeholder="* * * * * * *" autocomplete="off">
+    <button class="gate-btn" onclick="checkCode()">Enter Program</button>
+    <div class="gate-err" id="gateErr"></div>
+    <div class="gate-footer">2025 Advanced Athletic Medicine - Individual Use Only</div>
+  </div>
+</div>
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="menu-btn" onclick="toggleMenu()">&#9776;</button>
+      <button class="home-btn" onclick="showSection('home')">Home</button>
+      <span class="page-title" id="pageTitle">Home</span>
+    </div>
+    <div class="topbar-right">AAM Arm Care 2025</div>
+  </div>
+  <div class="layout">
+    <div id="sidebar">
+      <div class="nav-section">
+        <div class="nav-label">Home</div>
+        <div class="nav-item active" onclick="showSection('home')">Home</div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Foundation</div>
+        <div class="nav-item" onclick="showSection('why')">Why Arm Care Matters</div>
+        <div class="nav-item" onclick="showSection('standards')">AAM Standards</div>
+        <div class="nav-item" onclick="showSection('redflags')">Red Flags</div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Exercise Library</div>
+        <div class="nav-item" onclick="showSection('tspine')">T-Spine Mobility</div>
+        <div class="nav-item" onclick="showSection('foamroll')">Foam Roll</div>
+        <div class="nav-item" onclick="showSection('stretching')">Static Stretching</div>
+        <div class="nav-item" onclick="showSection('dynamic')">Dynamic Warm-Up</div>
+        <div class="nav-item" onclick="showSection('prebands')">Pre-Throw Bands</div>
+        <div class="nav-item" onclick="showSection('postbands')">Post-Throw Bands</div>
+        <div class="nav-item" onclick="showSection('scapular')">Scapular Control</div>
+        <div class="nav-item" onclick="showSection('twoout')">2-Out Drill</div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Programs</div>
+        <div class="nav-item" onclick="showSection('gethot')">Get Hot Routine</div>
+        <div class="nav-item" onclick="showSection('gameday')">Game Day Routines</div>
+        <div class="nav-item" onclick="showSection('rtt')">Return-to-Throw</div>
+        <div class="nav-item" onclick="showSection('mound')">Mound Progression</div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Guidelines</div>
+        <div class="nav-item" onclick="showSection('pitchcount')">Pitch Count Rules</div>
+        <div class="nav-item" onclick="showSection('recovery')">Recovery</div>
+        <div class="nav-item" onclick="showSection('youth')">Youth Arm Care</div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Tools</div>
+        <div class="nav-item" onclick="showSection('readiness')">Arm Readiness Check</div>
+        <div class="nav-item" onclick="showSection('tracker')">Volume Tracker</div>
+        <div class="nav-item" onclick="showSection('scheduler')">Weekly Builder</div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Reference</div>
+        <div class="nav-item" onclick="showSection('faq')">FAQ</div>
+        <div class="nav-item" onclick="showSection('contact')">Contact</div>
+      </div>
+    </div>
+    <div class="content" id="contentArea">
+      <div class="section active" id="sec-home">
+        <div class="home-hero">
+          <h1>Arm Care Manual</h1>
+          <p>Evidence-Based Standards for the Throwing Athlete - 2025 Edition</p>
+          <div class="home-bar"></div>
+        </div>
+        <div class="home-group-label">Foundation</div>
+        <div class="home-grid">
+          <div class="home-card" onclick="showSection('why')"><div class="icon">&#128214;</div><div class="name">Why Arm Care Matters</div><div class="desc">Fatigue, preparation, and long-term development</div><div class="tag">Section 1</div></div>
+          <div class="home-card" onclick="showSection('standards')"><div class="icon">&#128203;</div><div class="name">AAM Standards</div><div class="desc">The six principles that guide every training decision</div><div class="tag">Section 2</div></div>
+          <div class="home-card" onclick="showSection('redflags')"><div class="icon">&#9888;</div><div class="name">Red Flags</div><div class="desc">Know when to stop</div><div class="tag">Section 3</div></div>
+        </div>
+        <div class="home-group-label">Exercise Library</div>
+        <div class="home-grid">
+          <div class="home-card" onclick="showSection('tspine')"><div class="icon">&#128260;</div><div class="name">T-Spine Mobility</div><div class="desc">6 exercises - rotational foundation</div><div class="tag">Daily</div></div>
+          <div class="home-card" onclick="showSection('foamroll')"><div class="icon">&#128307;</div><div class="name">Foam Roll</div><div class="desc">9 areas - full kinetic chain prep</div><div class="tag">Daily</div></div>
+          <div class="home-card" onclick="showSection('stretching')"><div class="icon">&#129336;</div><div class="name">Static Stretching</div><div class="desc">10 stretches - shoulder, hip, pec</div><div class="tag">Daily</div></div>
+          <div class="home-card" onclick="showSection('dynamic')"><div class="icon">&#127939;</div><div class="name">Dynamic Warm-Up</div><div class="desc">17 movements - neuromuscular activation</div><div class="tag">Daily</div></div>
+          <div class="home-card" onclick="showSection('prebands')"><div class="icon">&#128170;</div><div class="name">Pre-Throw Bands</div><div class="desc">15 exercises - activation before mound</div><div class="tag">Pre-Throw</div></div>
+          <div class="home-card" onclick="showSection('postbands')"><div class="icon">&#128257;</div><div class="name">Post-Throw Bands</div><div class="desc">7 isometric holds - restoration</div><div class="tag">Post-Throw</div></div>
+          <div class="home-card" onclick="showSection('scapular')"><div class="icon">&#9898;</div><div class="name">Scapular Control</div><div class="desc">Blackburns, Kendalls, Banded Y</div><div class="tag">Arm Care</div></div>
+          <div class="home-card" onclick="showSection('twoout')"><div class="icon">&#9918;</div><div class="name">2-Out Drill</div><div class="desc">30-45 sec in-game ROM drill</div><div class="tag">In-Game</div></div>
+        </div>
+        <div class="home-group-label">Programs</div>
+        <div class="home-grid">
+          <div class="home-card" onclick="showSection('gethot')"><div class="icon">&#128293;</div><div class="name">Get Hot Routine</div><div class="desc">Dynamic activation and arm ramp</div><div class="tag">Pre-Game</div></div>
+          <div class="home-card" onclick="showSection('gameday')"><div class="icon">&#127918;</div><div class="name">Game Day Routines</div><div class="desc">SP, RP, Position Player, Catcher</div><div class="tag">Game Day</div></div>
+          <div class="home-card" onclick="showSection('rtt')"><div class="icon">&#128200;</div><div class="name">Return-to-Throw</div><div class="desc">Steps 1-14 - 6 to 8 weeks</div><div class="tag">Program</div></div>
+          <div class="home-card" onclick="showSection('mound')"><div class="icon">&#9968;</div><div class="name">Mound Progression</div><div class="desc">10-week bullpen build</div><div class="tag">Program</div></div>
+        </div>
+        <div class="home-group-label">Tools</div>
+        <div class="home-grid">
+          <div class="home-card" onclick="showSection('readiness')"><div class="icon">&#128221;</div><div class="name">Arm Readiness Check</div><div class="desc">Post-throw check-in and history</div><div class="tag">Tool</div></div>
+          <div class="home-card" onclick="showSection('tracker')"><div class="icon">&#128202;</div><div class="name">Volume Tracker</div><div class="desc">Log sessions and weekly totals</div><div class="tag">Tool</div></div>
+          <div class="home-card" onclick="showSection('scheduler')"><div class="icon">&#128197;</div><div class="name">Weekly Builder</div><div class="desc">Build your custom weekly schedule</div><div class="tag">Tool</div></div>
+        </div>
+        <div style="height:40px"></div>
+      </div>
+      <div class="section" id="sec-why"><h1>Why Arm Care Matters</h1><div class="gold-bar"></div><p>Content coming in Layer 2.</p></div>
+      <div class="section" id="sec-standards"><h1>AAM Standards</h1><div class="gold-bar"></div><p>Content coming in Layer 2.</p></div>
+      <div class="section" id="sec-redflags"><h1>Red Flags</h1><div class="gold-bar"></div><p>Content coming in Layer 2.</p></div>
+      <div class="section" id="sec-tspine"><h1>T-Spine Mobility</h1><div class="gold-bar"></div><p>Exercise content coming in Layer 3.</p></div>
+      <div class="section" id="sec-foamroll"><h1>Foam Roll</h1><div class="gold-bar"></div><p>Exercise content coming in Layer 3.</p></div>
+      <div class="section" id="sec-stretching"><h1>Static Stretching</h1><div class="gold-bar"></div><p>Exercise content coming in Layer 3.</p></div>
+      <div class="section" id="sec-dynamic"><h1>Dynamic Warm-Up</h1><div class="gold-bar"></div><p>Exercise content coming in Layer 3.</p></div>
+      <div class="section" id="sec-prebands"><h1>Pre-Throw Bands</h1><div class="gold-bar"></div><p>Exercise content coming in Layer 3.</p></div>
+      <div class="section" id="sec-postbands"><h1>Post-Throw Bands</h1><div class="gold-bar"></div><p>Exercise content coming in Layer 3.</p></div>
+      <div class="section" id="sec-scapular"><h1>Scapular Control</h1><div class="gold-bar"></div><p>Exercise content coming in Layer 3.</p></div>
+      <div class="section" id="sec-twoout"><h1>2-Out Drill</h1><div class="gold-bar"></div><p>Exercise content coming in Layer 3.</p></div>
+      <div class="section" id="sec-gethot"><h1>Get Hot Routine</h1><div class="gold-bar"></div><p>Content coming in Layer 2.</p></div>
+      <div class="section" id="sec-gameday"><h1>Game Day Routines</h1><div class="gold-bar"></div><p>Content coming in Layer 2.</p></div>
+      <div class="section" id="sec-rtt"><h1>Return-to-Throw</h1><div class="gold-bar"></div><p>Content coming in Layer 2.</p></div>
+      <div class="section" id="sec-mound"><h1>Mound Progression</h1><div class="gold-bar"></div><p>Content coming in Layer 2.</p></div>
+      <div class="section" id="sec-pitchcount"><h1>Pitch Count Rules</h1><div class="gold-bar"></div><p>Content coming in Layer 2.</p></div>
+      <div class="section" id="sec-recovery"><h1>Recovery</h1><div class="gold-bar"></div><p>Content coming in Layer 2.</p></div>
+      <div class="section" id="sec-youth"><h1>Youth Arm Care</h1><div class="gold-bar"></div><p>Content coming in Layer 2.</p></div>
+      <div class="section" id="sec-readiness"><h1>Arm Readiness Check</h1><div class="gold-bar"></div><p>Tool coming in Layer 4.</p></div>
+      <div class="section" id="sec-tracker"><h1>Volume Tracker</h1><div class="gold-bar"></div><p>Tool coming in Layer 4.</p></div>
+      <div class="section" id="sec-scheduler"><h1>Weekly Builder</h1><div class="gold-bar"></div><p>Tool coming in Layer 4.</p></div>
+      <div class="section" id="sec-faq"><h1>FAQ</h1><div class="gold-bar"></div><p>Content coming in Layer 2.</p></div>
+      <div class="section" id="sec-contact"><h1>Contact</h1><div class="gold-bar"></div><p>Contact info coming in Layer 2.</p></div>
+    </div>
+  </div>
+</div>
+<script>
+var CODE = 'AAM2025';
+function checkCode() {
+  var v = document.getElementById('codeInput').value.trim().toUpperCase();
+  if (v === CODE) {
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+  } else {
+    document.getElementById('gateErr').textContent = 'Incorrect code.';
+  }
+}
+document.getElementById('codeInput').onkeydown = function(e) {
+  if (e.key === 'Enter') checkCode();
+};
+var titles = {home:'Home',why:'Why Arm Care Matters',standards:'AAM Standards',redflags:'Red Flags',tspine:'T-Spine Mobility',foamroll:'Foam Roll',stretching:'Static Stretching',dynamic:'Dynamic Warm-Up',prebands:'Pre-Throw Bands',postbands:'Post-Throw Bands',scapular:'Scapular Control',twoout:'2-Out Drill',gethot:'Get Hot Routine',gameday:'Game Day Routines',rtt:'Return-to-Throw',mound:'Mound Progression',pitchcount:'Pitch Count Rules',recovery:'Recovery',youth:'Youth Arm Care',readiness:'Arm Readiness Check',tracker:'Volume Tracker',scheduler:'Weekly Builder',faq:'FAQ',contact:'Contact'};
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
+  var sec = document.getElementById('sec-' + id);
+  if (sec) sec.classList.add('active');
+  document.getElementById('pageTitle').textContent = titles[id] || id;
+  document.querySelectorAll('.nav-item').forEach(function(n){
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').indexOf("'"+id+"'") >= 0) n.classList.add('active');
+  });
+  document.getElementById('contentArea').style.padding = id === 'home' ? '0' : '32px 36px';
+  window.scrollTo(0,0);
+  document.getElementById('sidebar').classList.remove('open');
+}
+function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); }
+</script>
+</body>
+</html>

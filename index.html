@@ -317,6 +317,7 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
       </div>
       <div class="nav-section"><div class="nav-label">Reference</div>
         <div class="nav-item" onclick="showSection('faq')">FAQ</div>
+        <div class="nav-item" onclick="showSection('legal')">Legal and Disclaimer</div>
         <div class="nav-item" onclick="showSection('contact')">Contact</div>
       </div>
     </div>
@@ -1045,6 +1046,57 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
         <div id="faq-container"></div>
       </div>
 
+      <!-- LEGAL -->
+      <div class="section" id="sec-legal">
+        <div class="sec-eyebrow">Reference</div>
+        <h1 class="sec-title">Legal Notice and Disclaimer</h1>
+        <div class="gold-bar"></div>
+
+        <div class="h2">Educational Purpose</div>
+        <div class="prose">
+          <p>This manual is provided for educational and training purposes only and is intended to support general arm care principles within the Advanced Athletic Medicine (AAM) system. It does not constitute medical advice and is not a substitute for individualized evaluation, diagnosis, or treatment by a qualified healthcare or sports medicine professional.</p>
+          <p>Because each athlete's movement patterns, medical history, training demands, and risk factors differ, no single program is appropriate for every individual. This arm care program does not replace a comprehensive physical, orthopedic, or movement assessment and should not be used to self-diagnose, self-treat, or ignore pain or functional limitation.</p>
+          <p>Athletes experiencing pain, injury, or symptoms should seek individualized evaluation and appropriate medical guidance before initiating or continuing any training or throwing program.</p>
+        </div>
+
+        <div class="h2">Medical Clearance</div>
+        <div class="prose">
+          <p>Participation in this program assumes the athlete has been cleared for physical activity when required by a qualified medical professional, is participating under appropriate supervision when indicated, and understands the importance of monitoring symptoms and communicating concerns promptly.</p>
+          <p>Certain conditions - including but not limited to recent surgery, active injury, growth plate concerns, or prior UCL pathology - require individualized medical clearance before initiating any throwing program. When uncertainty exists about readiness to participate, individualized professional guidance takes priority over general program recommendations.</p>
+          <p>AAM providers are available to assist in determining appropriate program entry points and modifications based on individual health status and history.</p>
+        </div>
+
+        <div class="h2">Reader Acknowledgment</div>
+        <div class="callout callout-navy">By accessing, reviewing, or using this manual, the reader acknowledges and agrees that:<br><br>
+        This material is educational in nature and does not constitute individualized medical care.<br><br>
+        Implementation of any training activity described in this manual is undertaken voluntarily and at the reader own risk.<br><br>
+        Responsibility for appropriate use, adequate supervision, and medical clearance rests with the athlete and parent or guardian.<br><br>
+        Advanced Athletic Medicine bears no liability for injury, illness, or adverse outcomes resulting from use of this material outside of a supervised clinical relationship.</div>
+
+        <div class="h2">Limitation of Liability</div>
+        <div class="prose">
+          <p>Advanced Athletic Medicine, its providers, staff, and affiliated personnel make no representations or warranties regarding the accuracy, completeness, or fitness for purpose of the information contained in this manual. This material reflects current evidence and clinical practice at the time of publication and is subject to change as research evolves.</p>
+          <p>In no event shall Advanced Athletic Medicine be liable for any direct, indirect, incidental, or consequential damages arising from the use or misuse of this material, including but not limited to injury, illness, lost training time, or adverse athletic outcomes.</p>
+        </div>
+
+        <div class="h2">Intellectual Property</div>
+        <div class="dis-box"><strong>2025 Advanced Athletic Medicine. All rights reserved.</strong><br><br>This manual and all accompanying materials are the intellectual property of Advanced Athletic Medicine. No part of this content may be reproduced, distributed, shared, copied, or transmitted in any form or by any means without prior written permission from Advanced Athletic Medicine. This material is intended for individual educational use only and may not be resold, rebranded, sublicensed, or used for commercial purposes without express written authorization.</div>
+
+        <div class="h2">References</div>
+        <div class="prose">
+          <p>Escamilla RF, Yamashiro K, Mikla T, Collins J, Lieppman K, Andrews JR. Effects of a Short-Duration Stretching Drill After Pitching on Elbow and Shoulder Range of Motion in Professional Baseball Pitchers. <em>Am J Sports Med.</em> 2017;45(3):692-700.</p>
+          <p>Fleisig GS, Andrews JR, Cutter GR, Weber A, Loftice J, McMichael C, Hassell N, Lyman S. Risk of serious injury for young baseball pitchers: a 10-year prospective study. <em>Am J Sports Med.</em> 2011;39(2):253-257.</p>
+          <p>Wilk KE, Macrina LC, Fleisig GS, et al. Correlation of glenohumeral internal rotation deficit and total rotational motion to shoulder injuries in professional baseball pitchers. <em>Am J Sports Med.</em> 2011;39(2):329-335.</p>
+          <p>Lyman S, Fleisig GS, Andrews JR, Osinski ED. Effect of pitch type, pitch count, and pitching mechanics on risk of elbow and shoulder pain in youth baseball pitchers. <em>Am J Sports Med.</em> 2002;30(4):463-468.</p>
+          <p>Dun S, Loftice J, Fleisig GS, Kingsley D, Andrews JR. A biomechanical comparison of youth baseball pitches: is the curveball potentially harmful? <em>Am J Sports Med.</em> 2008;36(4):686-692.</p>
+          <p>Olsen SJ, Fleisig GS, Dun S, Loftice J, Andrews JR. Risk factors for shoulder and elbow injuries in adolescent baseball pitchers. <em>Am J Sports Med.</em> 2006;34(6):905-912.</p>
+          <p>Kerut EK, Kerut DG, Fleisig GS, Andrews JR. Prevention of arm injury in youth baseball pitchers. <em>J La State Med Soc.</em> 2008;160(2):95-98.</p>
+          <p>Pitch Smart Guidelines. Major League Baseball and USA Baseball. Available at: pitchsmart.org.</p>
+          <p>Little League Baseball. Pitch count regulations and age-appropriate guidelines. Available at: littleleague.org.</p>
+          <p>American Sports Medicine Institute (ASMI). Position statement for youth baseball pitchers. Birmingham, AL. Available at: asmi.org.</p>
+        </div>
+      </div>
+
       <!-- CONTACT -->
       <div class="section" id="sec-contact">
         <div class="sec-eyebrow">Reference</div>
@@ -1083,7 +1135,7 @@ document.getElementById('codeInput').onkeydown = function(e) { if (e.key === 'En
 document.querySelector('.gate-btn').addEventListener('click', function(e) { e.preventDefault(); checkCode(); });
 document.querySelector('.gate-btn').addEventListener('touchend', function(e) { e.preventDefault(); checkCode(); });
 
-var titles = {home:'Home',why:'Why Arm Care Matters',standards:'AAM Standards',redflags:'Red Flags',tspine:'T-Spine Mobility',foamroll:'Foam Roll',stretching:'Static Stretching',dynamic:'Dynamic Warm-Up',prebands:'Pre-Throw Bands',postbands:'Post-Throw Bands',scapular:'Scapular Control',twoout:'2-Out Drill',gethot:'Get Hot Routine',gameday:'Game Day Routines',mound:'Mound Progression',pitchcount:'Pitch Count Rules',recovery:'Recovery',youth:'Youth Arm Care',annual:'Annual Planning',throwingorder:'Daily Throwing Order',principles:'Arm Care Principles',readiness:'Arm Readiness Check',tracker:'Volume Tracker',scheduler:'Weekly Builder',faq:'FAQ',contact:'Contact'};
+var titles = {home:'Home',why:'Why Arm Care Matters',standards:'AAM Standards',redflags:'Red Flags',tspine:'T-Spine Mobility',foamroll:'Foam Roll',stretching:'Static Stretching',dynamic:'Dynamic Warm-Up',prebands:'Pre-Throw Bands',postbands:'Post-Throw Bands',scapular:'Scapular Control',twoout:'2-Out Drill',gethot:'Get Hot Routine',gameday:'Game Day Routines',mound:'Mound Progression',pitchcount:'Pitch Count Rules',recovery:'Recovery',youth:'Youth Arm Care',annual:'Annual Planning',throwingorder:'Daily Throwing Order',principles:'Arm Care Principles',readiness:'Arm Readiness Check',tracker:'Volume Tracker',scheduler:'Weekly Builder',faq:'FAQ',legal:'Legal and Disclaimer',contact:'Contact'};
 
 function showSection(id) {
   document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });

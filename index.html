@@ -265,7 +265,6 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
         <div class="nav-item" onclick="showSection('principles')">Arm Care Principles</div>
         <div class="nav-item" onclick="showSection('gethot')">Get Hot Routine</div>
         <div class="nav-item" onclick="showSection('gameday')">Game Day Routines</div>
-        <div class="nav-item" onclick="showSection('rtt')">Return-to-Throw</div>
         <div class="nav-item" onclick="showSection('mound')">Mound Progression</div>
       </div>
       <div class="nav-section"><div class="nav-label">Guidelines</div>
@@ -326,7 +325,6 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
           <div class="home-card" onclick="showSection('principles')"><div class="icon">&#127919;</div><div class="name">Arm Care Principles</div><div class="desc">Long toss, weighted balls, intent vs. velocity</div><div class="tag">Foundation</div></div>
           <div class="home-card" onclick="showSection('gethot')"><div class="icon">&#128293;</div><div class="name">Get Hot Routine</div><div class="desc">Dynamic activation and arm ramp</div><div class="tag">Pre-Game</div></div>
           <div class="home-card" onclick="showSection('gameday')"><div class="icon">&#127918;</div><div class="name">Game Day Routines</div><div class="desc">SP, RP, Position Player, Catcher</div><div class="tag">Game Day</div></div>
-          <div class="home-card" onclick="showSection('rtt')"><div class="icon">&#128200;</div><div class="name">Return-to-Throw</div><div class="desc">Steps 1-14 - 6 to 8 weeks</div><div class="tag">Program</div></div>
           <div class="home-card" onclick="showSection('mound')"><div class="icon">&#9968;</div><div class="name">Mound Progression</div><div class="desc">10-week bullpen build</div><div class="tag">Program</div></div>
         </div>
         <div class="home-group-label">Tools</div>
@@ -747,27 +745,6 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
         </div>
       </div>
 
-      <!-- RTT -->
-      <div class="section" id="sec-rtt">
-        <div class="sec-eyebrow">Programs</div>
-        <h1 class="sec-title">Return-to-Throw Program</h1>
-        <div class="sec-sub">Interval throwing - Steps 1-14</div>
-        <div class="gold-bar"></div>
-        <div class="callout callout-warn"><span class="ct">Do Not Advance If:</span>Pain during or after throwing - Soreness beyond 24-36 hrs - Mechanical breakdown - Declining arm speed - Incomplete recovery. <strong>Repeating a stage is always safer than rushing forward.</strong></div>
-        <ul class="clist" style="margin-bottom:18px"><li>Program typically takes 6-8 weeks to complete</li><li>Throwing days every other day</li><li>Feeling good does not mean the arm is ready to advance</li></ul>
-        <div class="h2">Steps 1-11 - Interval Throwing</div>
-        <div class="steps-grid" id="rtt-steps"></div>
-        <div class="h2">Steps 12-14 - Positional Players</div>
-        <table class="tbl"><thead><tr><th>Distance</th><th>Step 12</th><th>Step 13</th><th>Step 14</th><th>Return to Normal</th></tr></thead><tbody>
-          <tr><td>45 ft</td><td>5-10</td><td>5-10</td><td>5-10</td><td rowspan="5" style="vertical-align:middle;font-weight:700;color:#0F1E35">Normal Volume</td></tr>
-          <tr><td>60 ft</td><td>5-10</td><td>5-10</td><td>5-10</td></tr>
-          <tr><td>90 ft</td><td>5-10</td><td>5-10</td><td>5-10</td></tr>
-          <tr><td>105 ft</td><td>10</td><td>10</td><td>10</td></tr>
-          <tr><td>120 ft</td><td>15</td><td>15</td><td>15</td></tr>
-          <tr><td>135 ft</td><td>10</td><td>-</td><td>-</td><td></td></tr>
-          <tr><td>Position Based</td><td>-</td><td>20 throws</td><td>20-30 throws</td><td>Full Return</td></tr>
-        </tbody></table>
-      </div>
 
       <!-- MOUND -->
       <div class="section" id="sec-mound">
@@ -1054,7 +1031,7 @@ function checkCode() {
 }
 document.getElementById('codeInput').onkeydown = function(e) { if (e.key === 'Enter') checkCode(); };
 
-var titles = {home:'Home',why:'Why Arm Care Matters',standards:'AAM Standards',redflags:'Red Flags',tspine:'T-Spine Mobility',foamroll:'Foam Roll',stretching:'Static Stretching',dynamic:'Dynamic Warm-Up',prebands:'Pre-Throw Bands',postbands:'Post-Throw Bands',scapular:'Scapular Control',twoout:'2-Out Drill',gethot:'Get Hot Routine',gameday:'Game Day Routines',rtt:'Return-to-Throw',mound:'Mound Progression',pitchcount:'Pitch Count Rules',recovery:'Recovery',youth:'Youth Arm Care',annual:'Annual Planning',throwingorder:'Daily Throwing Order',principles:'Arm Care Principles',readiness:'Arm Readiness Check',tracker:'Volume Tracker',scheduler:'Weekly Builder',faq:'FAQ',contact:'Contact'};
+var titles = {home:'Home',why:'Why Arm Care Matters',standards:'AAM Standards',redflags:'Red Flags',tspine:'T-Spine Mobility',foamroll:'Foam Roll',stretching:'Static Stretching',dynamic:'Dynamic Warm-Up',prebands:'Pre-Throw Bands',postbands:'Post-Throw Bands',scapular:'Scapular Control',twoout:'2-Out Drill',gethot:'Get Hot Routine',gameday:'Game Day Routines',mound:'Mound Progression',pitchcount:'Pitch Count Rules',recovery:'Recovery',youth:'Youth Arm Care',annual:'Annual Planning',throwingorder:'Daily Throwing Order',principles:'Arm Care Principles',readiness:'Arm Readiness Check',tracker:'Volume Tracker',scheduler:'Weekly Builder',faq:'FAQ',contact:'Contact'};
 
 function showSection(id) {
   document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });

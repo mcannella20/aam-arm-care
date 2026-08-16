@@ -152,6 +152,45 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
 .ex-sets { font-size: 12px; color: #C9A84C; font-weight: 700; margin-bottom: 6px; }
 .ex-instr { font-size: 13px; color: #4A4A52; line-height: 1.55; }
 @media (max-width: 500px) { .ex-card { grid-template-columns: 100px 1fr; } .ex-photo { min-height: 90px; } }
+
+.tool-form { background: #fff; border: 1px solid #E8E4DC; border-radius: 6px; padding: 24px; margin-bottom: 20px; }
+.form-row { margin-bottom: 16px; }
+.form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+.form-label { display: block; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4A4A52; margin-bottom: 6px; }
+.form-input, .form-select, .form-textarea { width: 100%; background: #FAFAF8; border: 1px solid #E8E4DC; color: #1C1C1E; font-family: Arial, sans-serif; font-size: 14px; padding: 10px 12px; border-radius: 3px; outline: none; }
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #C9A84C; }
+.form-textarea { min-height: 70px; resize: vertical; }
+.btn-primary { background: #C9A84C; color: #0F1E35; border: none; font-family: Arial, sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; padding: 11px 22px; border-radius: 3px; cursor: pointer; }
+.btn-primary:hover { background: #E4C97A; }
+.btn-secondary { background: #fff; color: #0F1E35; border: 1px solid #E8E4DC; font-family: Arial, sans-serif; font-weight: 700; font-size: 13px; padding: 10px 18px; border-radius: 3px; cursor: pointer; }
+.btn-secondary:hover { border-color: #C9A84C; color: #C9A84C; }
+.btn-danger { background: none; color: #C8402A; border: 1px solid #F0C0B8; font-family: Arial, sans-serif; font-size: 12px; padding: 8px 14px; border-radius: 3px; cursor: pointer; }
+.save-msg { font-size: 12px; color: #1A6A1A; font-weight: 700; display: none; margin-top: 8px; }
+.log-item { background: #fff; border: 1px solid #E8E4DC; border-radius: 4px; padding: 12px 16px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.log-date { font-size: 11px; color: #7A7A85; font-weight: 700; margin-bottom: 2px; }
+.log-detail { font-size: 14px; color: #0F1E35; font-weight: 700; }
+.log-sub { font-size: 12px; color: #4A4A52; }
+.log-del { background: none; border: none; color: #C8402A; cursor: pointer; font-size: 18px; padding: 4px; }
+.weekly-summary { background: #0F1E35; color: #fff; border-radius: 6px; padding: 20px 24px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+.ws-item { text-align: center; }
+.ws-lbl { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #4A6A8A; margin-bottom: 5px; }
+.ws-val { font-size: 26px; font-weight: 700; color: #C9A84C; }
+.read-opts { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap: 8px; margin-bottom: 14px; }
+.read-opt { padding: 10px; border: 1px solid #E8E4DC; border-radius: 4px; text-align: center; cursor: pointer; background: #fff; font-size: 13px; font-weight: 700; color: #1C1C1E; }
+.read-opt:hover, .read-opt.sel { border-color: #C9A84C; background: #FDFBF4; }
+.read-opt.sel-red { border-color: #C8402A; background: #FDF2F0; color: #C8402A; }
+.chi { background: #fff; border: 1px solid #E8E4DC; border-radius: 4px; padding: 12px 16px; margin-bottom: 8px; }
+.chi-date { font-size: 11px; color: #7A7A85; font-weight: 700; margin-bottom: 4px; }
+.chi-body { font-size: 13px; color: #0F1E35; }
+.chi-flags { font-size: 12px; color: #C8402A; font-weight: 700; margin-top: 3px; }
+.sched-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 8px; margin: 16px 0; overflow-x: auto; }
+.sched-day { background: #fff; border: 1px solid #E8E4DC; border-radius: 4px; overflow: hidden; min-width: 90px; }
+.sched-hdr { background: #0F1E35; color: #fff; font-size: 11px; font-weight: 700; padding: 7px; text-align: center; text-transform: uppercase; letter-spacing: 1px; }
+.sched-body { padding: 8px; }
+.sched-check { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #1C1C1E; margin-bottom: 5px; cursor: pointer; }
+.sched-check input { accent-color: #C9A84C; cursor: pointer; }
+.saved-sched { background: #F0FAF0; border: 1px solid #B0D8B0; border-left: 4px solid #1A6A1A; border-radius: 4px; padding: 14px 18px; margin-bottom: 20px; font-size: 13px; color: #1C1C1E; line-height: 1.7; }
+@media (max-width: 700px) { .form-row-2 { grid-template-columns: 1fr; } .weekly-summary { grid-template-columns: 1fr 1fr; } .read-opts { grid-template-columns: repeat(2,1fr); } .sched-grid { grid-template-columns: repeat(4,1fr); } }
 </style>
 </head>
 <body>
@@ -663,9 +702,117 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
       </div>
 
       <!-- TOOLS PLACEHOLDERS -->
-      <div class="section" id="sec-readiness"><h1 class="sec-title">Arm Readiness Check</h1><div class="gold-bar"></div><div class="callout callout-gold">This tool is coming in the next update.</div></div>
-      <div class="section" id="sec-tracker"><h1 class="sec-title">Volume Tracker</h1><div class="gold-bar"></div><div class="callout callout-gold">This tool is coming in the next update.</div></div>
-      <div class="section" id="sec-scheduler"><h1 class="sec-title">Weekly Builder</h1><div class="gold-bar"></div><div class="callout callout-gold">This tool is coming in the next update.</div></div>
+      <div class="section" id="sec-readiness">
+  <div class="sec-eyebrow">Tools</div>
+  <h1 class="sec-title">Arm Readiness Check</h1>
+  <div class="gold-bar"></div>
+  <div class="callout callout-navy">Complete this after every throwing session. It takes less than a minute. Over time, this log helps you and your provider spot patterns before they become bigger issues.</div>
+  <div class="tool-form">
+    <div class="form-row"><label class="form-label">1. How did your arm feel today?</label>
+      <div class="read-opts">
+        <div class="read-opt" onclick="selRead(this,'feel','great')">Great</div>
+        <div class="read-opt" onclick="selRead(this,'feel','good')">Good</div>
+        <div class="read-opt" onclick="selRead(this,'feel','ok')">OK</div>
+        <div class="read-opt" onclick="selRead(this,'feel','sore')">Sore</div>
+        <div class="read-opt sel-red" onclick="selRead(this,'feel','painful')">Painful</div>
+      </div>
+    </div>
+    <div class="form-row"><label class="form-label">2. Soreness level</label>
+      <div class="read-opts">
+        <div class="read-opt" onclick="selRead(this,'soreness','none')">None</div>
+        <div class="read-opt" onclick="selRead(this,'soreness','mild')">Mild</div>
+        <div class="read-opt" onclick="selRead(this,'soreness','moderate')">Moderate</div>
+        <div class="read-opt sel-red" onclick="selRead(this,'soreness','significant')">Significant</div>
+      </div>
+    </div>
+    <div class="form-row"><label class="form-label">3. Any pain during throwing?</label>
+      <div class="read-opts">
+        <div class="read-opt" onclick="selRead(this,'pain','no')">No</div>
+        <div class="read-opt sel-red" onclick="selRead(this,'pain','sharp')">Yes - Sharp</div>
+        <div class="read-opt sel-red" onclick="selRead(this,'pain','numb')">Yes - Numbness</div>
+      </div>
+    </div>
+    <div class="form-row"><label class="form-label">4. Velocity and control vs normal</label>
+      <div class="read-opts">
+        <div class="read-opt" onclick="selRead(this,'velo','better')">Better</div>
+        <div class="read-opt" onclick="selRead(this,'velo','normal')">Normal</div>
+        <div class="read-opt sel-red" onclick="selRead(this,'velo','worse')">Worse</div>
+      </div>
+    </div>
+    <div class="form-row"><label class="form-label">5. Sleep last night</label>
+      <div class="read-opts">
+        <div class="read-opt" onclick="selRead(this,'sleep','good')">Good - 8+ hrs</div>
+        <div class="read-opt" onclick="selRead(this,'sleep','ok')">OK - 6-8 hrs</div>
+        <div class="read-opt sel-red" onclick="selRead(this,'sleep','poor')">Poor - under 6</div>
+      </div>
+    </div>
+    <div class="form-row"><label class="form-label">Notes (optional)</label>
+      <textarea class="form-textarea" id="read-notes" placeholder="Any other observations..."></textarea>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <button class="btn-primary" onclick="saveReadiness()">Save Check-In</button>
+      <button class="btn-danger" onclick="clearReadiness()">Clear History</button>
+    </div>
+    <div class="save-msg" id="read-msg">Check-in saved</div>
+  </div>
+  <div class="h2">Check-In History</div>
+  <div id="read-history"><div style="color:#7A7A85;font-size:14px;padding:16px 0">No check-ins logged yet.</div></div>
+</div>
+      <div class="section" id="sec-tracker">
+  <div class="sec-eyebrow">Tools</div>
+  <h1 class="sec-title">Volume Tracker</h1>
+  <div class="gold-bar"></div>
+  <div id="weekly-summary-wrap"></div>
+  <div class="tool-form">
+    <div class="form-row-2">
+      <div><label class="form-label">Date</label><input type="date" class="form-input" id="log-date"></div>
+      <div><label class="form-label">Total Throws</label><input type="number" class="form-input" id="log-throws" placeholder="e.g. 45" min="0"></div>
+    </div>
+    <div class="form-row-2">
+      <div><label class="form-label">Session Type</label>
+        <select class="form-select" id="log-type">
+          <option>Catch / Easy Toss</option><option>Long Toss</option><option>Bullpen</option>
+          <option>Short Box</option><option>Plyo</option><option>Game</option><option>Warm-Up Only</option>
+        </select>
+      </div>
+      <div><label class="form-label">Max Distance (ft) - optional</label><input type="number" class="form-input" id="log-dist" placeholder="e.g. 90" min="0"></div>
+    </div>
+    <div class="form-row"><label class="form-label">Notes - optional</label>
+      <textarea class="form-textarea" id="log-notes" placeholder="How did it feel?"></textarea>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <button class="btn-primary" onclick="logSession()">Log Session</button>
+      <button class="btn-secondary" onclick="exportCSV()">Export CSV</button>
+      <button class="btn-danger" onclick="clearLog()" style="margin-left:auto">Clear All</button>
+    </div>
+    <div class="save-msg" id="log-msg">Session logged</div>
+  </div>
+  <div class="h2">Session Log</div>
+  <div id="session-log"><div style="color:#7A7A85;font-size:14px;padding:16px 0">No sessions logged yet.</div></div>
+</div>
+      <div class="section" id="sec-scheduler">
+  <div class="sec-eyebrow">Tools</div>
+  <h1 class="sec-title">Weekly Arm Care Builder</h1>
+  <div class="gold-bar"></div>
+  <div id="saved-sched-display"></div>
+  <div class="h2">AAM Sample Weekly Plan</div>
+  <div style="overflow-x:auto">
+  <table class="tbl" style="min-width:650px"><thead><tr><th></th><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead><tbody>
+    <tr><td><strong>Warm-Up</strong></td><td>T-Spine Foam Roll</td><td>T-Spine Foam Roll</td><td>T-Spine Foam Roll</td><td>T-Spine Foam Roll</td><td>T-Spine Foam Roll</td><td>T-Spine Foam Roll</td><td>T-Spine Foam Roll</td></tr>
+    <tr><td><strong>Pre-Throw</strong></td><td>-</td><td>Bands Rev Throws</td><td>Pre-Throw Bands</td><td>-</td><td>Pre-Throw Bands</td><td>Pre-Throw Bands</td><td>Pre-Throw Bands</td></tr>
+    <tr><td><strong>Throwing</strong></td><td>Off</td><td>Long Toss 120ft</td><td>Bullpen</td><td>Off</td><td>Short Box</td><td>Long Toss 120ft</td><td>Bullpen or Game</td></tr>
+    <tr><td><strong>Post-Throw</strong></td><td>-</td><td>Isometric Holds</td><td>Isometric Holds</td><td>-</td><td>Isometric Holds</td><td>Isometric Holds</td><td>Isometric Holds</td></tr>
+    <tr><td><strong>Treatment</strong></td><td>Recovery</td><td>Rehab</td><td>Plyo</td><td>Recovery</td><td>Plyo</td><td>Rehab</td><td>-</td></tr>
+  </tbody></table>
+  </div>
+  <div class="h2">Build Your Own Schedule</div>
+  <div class="sched-grid" id="sched-builder"></div>
+  <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+    <button class="btn-primary" onclick="saveSchedule()">Save My Schedule</button>
+    <button class="btn-secondary" onclick="resetSchedule()">Reset</button>
+  </div>
+  <div class="save-msg" id="sched-msg">Schedule saved</div>
+</div>
 
       <!-- FAQ -->
       <div class="section" id="sec-faq">
@@ -705,6 +852,7 @@ function checkCode() {
   if (v === CODE) {
     document.getElementById('gate').style.display = 'none';
     document.getElementById('app').style.display = 'block';
+    setTimeout(function(){ try{initTools();}catch(e){} }, 100);
   } else {
     document.getElementById('gateErr').textContent = 'Incorrect code.';
   }
@@ -793,6 +941,143 @@ if (fc) {
     fc.appendChild(item);
   });
 }
+
+// READINESS CHECK
+var readVals = {};
+function selRead(el, key, val) {
+  var parent = el.parentElement;
+  parent.querySelectorAll('.read-opt').forEach(function(o) { o.classList.remove('sel'); });
+  el.classList.add('sel');
+  readVals[key] = val;
+}
+function saveReadiness() {
+  var flags = [];
+  if (readVals.feel === 'painful') flags.push('Arm felt painful');
+  if (readVals.pain && readVals.pain !== 'no') flags.push('Pain during throwing');
+  if (readVals.soreness === 'significant') flags.push('Significant soreness');
+  if (readVals.velo === 'worse') flags.push('Velocity or control declined');
+  if (readVals.sleep === 'poor') flags.push('Poor sleep');
+  var entry = { date: new Date().toLocaleDateString(), feel: readVals.feel || '-', soreness: readVals.soreness || '-', pain: readVals.pain || '-', velo: readVals.velo || '-', sleep: readVals.sleep || '-', notes: document.getElementById('read-notes').value, flags: flags };
+  var logs = JSON.parse(localStorage.getItem('aamReadiness') || '[]');
+  logs.unshift(entry);
+  localStorage.setItem('aamReadiness', JSON.stringify(logs));
+  document.getElementById('read-notes').value = '';
+  readVals = {};
+  document.querySelectorAll('.read-opt').forEach(function(o) { o.classList.remove('sel'); });
+  var msg = document.getElementById('read-msg');
+  msg.textContent = flags.length ? 'Check-in saved - ' + flags.length + ' flag(s) noted' : 'Check-in saved';
+  msg.style.display = 'block';
+  setTimeout(function() { msg.style.display = 'none'; }, 2500);
+  renderReadiness();
+}
+function clearReadiness() { if (confirm('Clear all check-in history?')) { localStorage.removeItem('aamReadiness'); renderReadiness(); } }
+function renderReadiness() {
+  var el = document.getElementById('read-history');
+  if (!el) return;
+  var logs = JSON.parse(localStorage.getItem('aamReadiness') || '[]');
+  if (!logs.length) { el.innerHTML = '<div style="color:#7A7A85;font-size:14px;padding:16px 0">No check-ins logged yet.</div>'; return; }
+  el.innerHTML = logs.slice(0,20).map(function(l) {
+    return '<div class="chi"><div class="chi-date">' + l.date + '</div><div class="chi-body">Arm: <strong>' + l.feel + '</strong> | Soreness: ' + l.soreness + ' | Pain: ' + l.pain + ' | Velo: ' + l.velo + ' | Sleep: ' + l.sleep + (l.notes ? '<br>' + l.notes : '') + '</div>' + (l.flags && l.flags.length ? '<div class="chi-flags">Flags: ' + l.flags.join(' | ') + '</div>' : '') + '</div>';
+  }).join('');
+}
+
+// VOLUME TRACKER
+function initDate() { var d = document.getElementById('log-date'); if (d) d.value = new Date().toISOString().split('T')[0]; }
+function logSession() {
+  var throws = parseInt(document.getElementById('log-throws').value);
+  if (!throws || throws < 0) { alert('Enter a valid throw count.'); return; }
+  var entry = { date: document.getElementById('log-date').value || new Date().toLocaleDateString(), throws: throws, type: document.getElementById('log-type').value, dist: document.getElementById('log-dist').value || '-', notes: document.getElementById('log-notes').value };
+  var logs = JSON.parse(localStorage.getItem('aamVolume') || '[]');
+  logs.unshift(entry);
+  localStorage.setItem('aamVolume', JSON.stringify(logs));
+  document.getElementById('log-throws').value = '';
+  document.getElementById('log-dist').value = '';
+  document.getElementById('log-notes').value = '';
+  var msg = document.getElementById('log-msg');
+  msg.style.display = 'block';
+  setTimeout(function() { msg.style.display = 'none'; }, 2000);
+  renderLog();
+  renderWeeklySummary();
+}
+function renderLog() {
+  var el = document.getElementById('session-log');
+  if (!el) return;
+  var logs = JSON.parse(localStorage.getItem('aamVolume') || '[]');
+  if (!logs.length) { el.innerHTML = '<div style="color:#7A7A85;font-size:14px;padding:16px 0">No sessions logged yet.</div>'; return; }
+  el.innerHTML = logs.map(function(l, i) {
+    return '<div class="log-item"><div><div class="log-date">' + l.date + '</div><div class="log-detail">' + l.throws + ' throws | ' + l.type + '</div><div class="log-sub">Distance: ' + l.dist + 'ft' + (l.notes ? ' | ' + l.notes : '') + '</div></div><button class="log-del" onclick="delLog(' + i + ')">x</button></div>';
+  }).join('');
+}
+function delLog(i) { var logs = JSON.parse(localStorage.getItem('aamVolume') || '[]'); logs.splice(i,1); localStorage.setItem('aamVolume', JSON.stringify(logs)); renderLog(); renderWeeklySummary(); }
+function clearLog() { if (confirm('Clear all sessions?')) { localStorage.removeItem('aamVolume'); renderLog(); renderWeeklySummary(); } }
+function renderWeeklySummary() {
+  var el = document.getElementById('weekly-summary-wrap');
+  if (!el) return;
+  var logs = JSON.parse(localStorage.getItem('aamVolume') || '[]');
+  var weekAgo = new Date(Date.now() - 7*24*60*60*1000);
+  var week = logs.filter(function(l) { return new Date(l.date) >= weekAgo; });
+  var total = week.reduce(function(s,l) { return s+l.throws; }, 0);
+  el.innerHTML = '<div class="weekly-summary"><div class="ws-item"><div class="ws-lbl">This Week</div><div class="ws-val">' + total + '</div><div style="font-size:10px;color:#4A6A8A">total throws</div></div><div class="ws-item"><div class="ws-lbl">Sessions</div><div class="ws-val">' + week.length + '</div></div><div class="ws-item"><div class="ws-lbl">Status</div><div class="ws-val" style="font-size:18px;color:' + (total>120?'#C8402A':'#1A6A1A') + '">' + (total>120?'High':'OK') + '</div></div></div>';
+}
+function exportCSV() {
+  var logs = JSON.parse(localStorage.getItem('aamVolume') || '[]');
+  if (!logs.length) { alert('No sessions to export.'); return; }
+  var rows = [['Date','Throws','Type','Distance','Notes']].concat(logs.map(function(l) { return [l.date,l.throws,l.type,l.dist,l.notes||'']; }));
+  var csv = rows.map(function(r) { return r.map(function(v) { return '"'+(v||'')+'"'; }).join(','); }).join('\n');
+  var a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'AAM_Volume_Log.csv';
+  a.click();
+}
+
+// WEEKLY BUILDER
+var schedDays = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+var schedActivities = ['T-Spine Mobility','Foam Roll','Static Stretch','Dynamic WU','Pre-Throw Bands','Post-Throw Bands','Long Toss','Bullpen','Short Box','Catch','Game','Rest Day'];
+function buildSchedUI() {
+  var el = document.getElementById('sched-builder');
+  if (!el) return;
+  var saved = JSON.parse(localStorage.getItem('aamSchedule') || '{}');
+  el.innerHTML = schedDays.map(function(d) {
+    var checks = schedActivities.map(function(a) {
+      var checked = saved[d] && saved[d].indexOf(a) >= 0 ? 'checked' : '';
+      return '<label class="sched-check"><input type="checkbox" data-day="' + d + '" data-act="' + a + '" ' + checked + '> ' + a + '</label>';
+    }).join('');
+    return '<div class="sched-day"><div class="sched-hdr">' + d + '</div><div class="sched-body">' + checks + '</div></div>';
+  }).join('');
+}
+function saveSchedule() {
+  var sched = {};
+  document.querySelectorAll('#sched-builder input:checked').forEach(function(cb) {
+    var d = cb.dataset.day, a = cb.dataset.act;
+    if (!sched[d]) sched[d] = [];
+    sched[d].push(a);
+  });
+  localStorage.setItem('aamSchedule', JSON.stringify(sched));
+  renderSchedule();
+  var msg = document.getElementById('sched-msg');
+  msg.style.display = 'block';
+  setTimeout(function() { msg.style.display = 'none'; }, 2000);
+}
+function resetSchedule() { localStorage.removeItem('aamSchedule'); buildSchedUI(); renderSchedule(); }
+function renderSchedule() {
+  var el = document.getElementById('saved-sched-display');
+  if (!el) return;
+  var sched = JSON.parse(localStorage.getItem('aamSchedule') || '{}');
+  if (!Object.keys(sched).length) { el.innerHTML = ''; buildSchedUI(); return; }
+  var lines = schedDays.map(function(d) { return '<strong>' + d + ':</strong> ' + (sched[d] && sched[d].length ? sched[d].join(', ') : 'Off'); }).join('<br>');
+  el.innerHTML = '<div class="saved-sched"><strong>My Saved Schedule</strong><br><br>' + lines + '</div>';
+  buildSchedUI();
+}
+
+// INIT ON LOGIN
+function initTools() {
+  initDate();
+  renderLog();
+  renderReadiness();
+  renderSchedule();
+  renderWeeklySummary();
+}
+
 </script>
 </body>
 </html>

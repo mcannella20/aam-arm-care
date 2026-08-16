@@ -242,7 +242,7 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
     <div class="gate-sub">Evidence-Based Standards for the Throwing Athlete</div>
     <label class="gate-label">Access Code</label>
     <input type="password" class="gate-input" id="codeInput" placeholder="* * * * * * *" autocomplete="off">
-    <button class="gate-btn" onclick="checkCode()">Enter Program</button>
+    <button class="gate-btn" onclick="checkCode()" ontouchend="checkCode()">Enter Program</button>
     <div class="gate-err" id="gateErr"></div>
     <div class="gate-footer">2025 Advanced Athletic Medicine - Individual Use Only</div>
   </div>
@@ -1080,6 +1080,8 @@ function checkCode() {
   }
 }
 document.getElementById('codeInput').onkeydown = function(e) { if (e.key === 'Enter') checkCode(); };
+document.querySelector('.gate-btn').addEventListener('click', function(e) { e.preventDefault(); checkCode(); });
+document.querySelector('.gate-btn').addEventListener('touchend', function(e) { e.preventDefault(); checkCode(); });
 
 var titles = {home:'Home',why:'Why Arm Care Matters',standards:'AAM Standards',redflags:'Red Flags',tspine:'T-Spine Mobility',foamroll:'Foam Roll',stretching:'Static Stretching',dynamic:'Dynamic Warm-Up',prebands:'Pre-Throw Bands',postbands:'Post-Throw Bands',scapular:'Scapular Control',twoout:'2-Out Drill',gethot:'Get Hot Routine',gameday:'Game Day Routines',mound:'Mound Progression',pitchcount:'Pitch Count Rules',recovery:'Recovery',youth:'Youth Arm Care',annual:'Annual Planning',throwingorder:'Daily Throwing Order',principles:'Arm Care Principles',readiness:'Arm Readiness Check',tracker:'Volume Tracker',scheduler:'Weekly Builder',faq:'FAQ',contact:'Contact'};
 

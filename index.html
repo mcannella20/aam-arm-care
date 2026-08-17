@@ -251,6 +251,19 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
 .df-nav-btn { background:#0F1E35; color:#C9A84C; border:none; font-family:Arial,sans-serif; font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; padding:8px 16px; border-radius:3px; cursor:pointer; }
 .df-nav-btn:hover { background:#1A2F4E; }
 @media (max-width:700px) { #daily-focus { margin:0 16px 16px; } .df-exercises { grid-template-columns:1fr; } }
+
+#home-schedule-card { display:none; margin:0 36px 0; border-radius:6px; overflow:hidden; border:1px solid #B0D8B0; background:#F0FAF0; }
+.hsc-hdr { background:#1A6A1A; padding:12px 20px; display:flex; align-items:center; justify-content:space-between; }
+.hsc-hdr-title { color:#fff; font-size:14px; font-weight:700; }
+.hsc-edit { background:none; border:1px solid rgba(255,255,255,0.3); color:#fff; font-family:Arial,sans-serif; font-size:11px; font-weight:700; padding:5px 12px; border-radius:3px; cursor:pointer; }
+.hsc-body { padding:14px 20px; }
+.hsc-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
+.hsc-day { text-align:center; }
+.hsc-day-name { font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#1A6A1A; margin-bottom:4px; }
+.hsc-day-items { display:flex; flex-direction:column; gap:3px; }
+.hsc-day-item { background:#fff; border:1px solid #B0D8B0; border-radius:2px; font-size:9px; color:#1C1C1E; padding:3px 4px; text-align:center; line-height:1.3; }
+.hsc-day-off { font-size:10px; color:#7A9A7A; text-align:center; padding:4px 0; font-style:italic; }
+@media (max-width:700px) { #home-schedule-card { margin:0 16px 0; } .hsc-grid { grid-template-columns:repeat(4,1fr); } }
 </style>
 </head>
 <body>
@@ -316,6 +329,11 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
         <div class="nav-item" onclick="showSection('scapular')">Scapular Control</div>
         <div class="nav-item" onclick="showSection('twoout')">2-Out Drill</div>
       </div>
+      <div class="nav-section"><div class="nav-label">Tools</div>
+        <div class="nav-item" onclick="showSection('readiness')">Arm Readiness Check</div>
+        <div class="nav-item" onclick="showSection('tracker')">Volume Tracker</div>
+        <div class="nav-item" onclick="showSection('scheduler')">Weekly Builder</div>
+      </div>
       <div class="nav-section"><div class="nav-label">Programs</div>
         <div class="nav-item" onclick="showSection('throwingorder')">Daily Throwing Order</div>
         <div class="nav-item" onclick="showSection('principles')">Arm Care Principles</div>
@@ -329,11 +347,6 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
         <div class="nav-item" onclick="showSection('recovery')">Recovery</div>
         <div class="nav-item" onclick="showSection('youth')">Youth Arm Care</div>
         <div class="nav-item" onclick="showSection('annual')">Annual Planning</div>
-      </div>
-      <div class="nav-section"><div class="nav-label">Tools</div>
-        <div class="nav-item" onclick="showSection('readiness')">Arm Readiness Check</div>
-        <div class="nav-item" onclick="showSection('tracker')">Volume Tracker</div>
-        <div class="nav-item" onclick="showSection('scheduler')">Weekly Builder</div>
       </div>
       <div class="nav-section"><div class="nav-label">Reference</div>
         <div class="nav-item" onclick="showSection('install')">Install the App</div>
@@ -360,6 +373,18 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
           </div>
         </div>
         <div id="rec-spacer" style="display:none;height:16px"></div>
+
+        <!-- HOME SCHEDULE CARD -->
+        <div id="home-schedule-card">
+          <div class="hsc-hdr">
+            <div class="hsc-hdr-title">My Weekly Schedule</div>
+            <button class="hsc-edit" onclick="showSection('scheduler')">Edit Schedule</button>
+          </div>
+          <div class="hsc-body">
+            <div class="hsc-grid" id="hsc-grid"></div>
+          </div>
+        </div>
+        <div id="hsc-spacer" style="display:none;height:16px"></div>
 
         <!-- DAILY FOCUS -->
         <div id="daily-focus">
@@ -1536,6 +1561,7 @@ function saveSchedule() {
   });
   localStorage.setItem('aamSchedule', JSON.stringify(sched));
   renderSchedule();
+  renderHomeSchedule();
   var msg = document.getElementById('sched-msg');
   msg.style.display = 'block';
   setTimeout(function() { msg.style.display = 'none'; }, 2000);
@@ -1560,6 +1586,7 @@ function initTools() {
   renderWeeklySummary();
   checkInstallBanner();
   buildDailyFocus();
+  renderHomeSchedule();
   setTimeout(function() { showArmPopup(); }, 600);
 }
 
@@ -1779,6 +1806,31 @@ function buildDailyFocus() {
   btn.textContent = 'Go to ' + focus.focus;
 
   el.style.display = 'block';
+}
+
+
+// HOME SCHEDULE CARD
+var schedDaysOrder = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+function renderHomeSchedule() {
+  var card = document.getElementById('home-schedule-card');
+  var spacer = document.getElementById('hsc-spacer');
+  var grid = document.getElementById('hsc-grid');
+  if (!card || !grid) return;
+  var sched = JSON.parse(localStorage.getItem('aamSchedule') || '{}');
+  if (!Object.keys(sched).length) {
+    card.style.display = 'none';
+    if (spacer) spacer.style.display = 'none';
+    return;
+  }
+  grid.innerHTML = schedDaysOrder.map(function(d) {
+    var items = sched[d] && sched[d].length ? sched[d] : null;
+    var itemsHtml = items
+      ? items.map(function(a) { return '<div class="hsc-day-item">' + a + '</div>'; }).join('')
+      : '<div class="hsc-day-off">Off</div>';
+    return '<div class="hsc-day"><div class="hsc-day-name">' + d + '</div><div class="hsc-day-items">' + itemsHtml + '</div></div>';
+  }).join('');
+  card.style.display = 'block';
+  if (spacer) spacer.style.display = 'block';
 }
 
 </script>

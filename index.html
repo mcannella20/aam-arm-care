@@ -232,19 +232,38 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
 .rec-text { font-size:13px; color:#4A4A52; line-height:1.6; }
 .rec-dismiss { background:none; border:none; color:#7A7A85; font-size:18px; cursor:pointer; flex-shrink:0; padding:0; align-self:flex-start; }
 @media (max-width:700px) { #rec-card { margin:0 16px 0; } }
+
+#daily-focus { display:none; margin:0 36px 16px; border-radius:6px; overflow:hidden; border:1px solid #E8E4DC; }
+.df-hdr { background:#0F1E35; padding:12px 20px; display:flex; align-items:center; justify-content:space-between; }
+.df-hdr-left { display:flex; align-items:center; gap:12px; }
+.df-day-badge { background:#C9A84C; color:#0F1E35; font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 10px; border-radius:20px; }
+.df-title { color:#fff; font-size:15px; font-weight:700; }
+.df-date { color:#4A6A8A; font-size:11px; }
+.df-body { background:#fff; padding:16px 20px; }
+.df-focus-label { font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#C9A84C; margin-bottom:6px; }
+.df-focus-name { font-size:17px; font-weight:700; color:#0F1E35; margin-bottom:8px; }
+.df-focus-why { font-size:13px; color:#4A4A52; line-height:1.65; margin-bottom:14px; }
+.df-exercises { display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:8px; }
+.df-ex { background:#F5F4F0; border:1px solid #E8E4DC; border-left:3px solid #C9A84C; border-radius:3px; padding:9px 12px; }
+.df-ex-name { font-size:13px; font-weight:700; color:#0F1E35; margin-bottom:2px; }
+.df-ex-detail { font-size:11px; color:#7A7A85; }
+.df-cta { margin-top:14px; display:flex; gap:8px; align-items:center; }
+.df-nav-btn { background:#0F1E35; color:#C9A84C; border:none; font-family:Arial,sans-serif; font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; padding:8px 16px; border-radius:3px; cursor:pointer; }
+.df-nav-btn:hover { background:#1A2F4E; }
+@media (max-width:700px) { #daily-focus { margin:0 16px 16px; } .df-exercises { grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
 <div id="gate">
   <div class="gate-box">
-    <div class="gate-org">Advanced Athletic Medicine</div>
+    <div class="gate-org">Throwers Mafia x AAM</div>
     <div class="gate-title">Arm Care Manual</div>
-    <div class="gate-sub">Evidence-Based Standards for the Throwing Athlete</div>
+    <div class="gate-sub">Throwers Mafia | Powered by Advanced Athletic Medicine</div>
     <label class="gate-label">Access Code</label>
     <input type="password" class="gate-input" id="codeInput" placeholder="* * * * * * *" autocomplete="off">
     <button class="gate-btn" onclick="checkCode()" ontouchend="checkCode()">Enter Program</button>
     <div class="gate-err" id="gateErr"></div>
-    <div class="gate-footer">2025 Advanced Athletic Medicine - Individual Use Only</div>
+    <div class="gate-footer">2025 Advanced Athletic Medicine · Throwers Mafia · Individual Use Only</div>
   </div>
 </div>
 <div id="app">
@@ -277,7 +296,7 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
       <button class="home-btn" onclick="showSection('home')">Home</button>
       <span class="page-title" id="pageTitle">Home</span>
     </div>
-    <div class="topbar-right">AAM Arm Care 2026</div>
+    <div class="topbar-right" style="text-align:right;line-height:1.4"><span style="color:#C9A84C;font-size:11px;font-weight:700;display:block">THROWERS MAFIA</span><span style="color:#4A6A8A;font-size:10px">Powered by AAM</span></div>
   </div>
   <div class="layout">
     <div id="sidebar">
@@ -302,6 +321,7 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
         <div class="nav-item" onclick="showSection('principles')">Arm Care Principles</div>
         <div class="nav-item" onclick="showSection('gethot')">Get Hot Routine</div>
         <div class="nav-item" onclick="showSection('gameday')">Game Day Routines</div>
+        <div class="nav-item" onclick="showSection('longtoss')">Long Toss</div>
         <div class="nav-item" onclick="showSection('mound')">Mound Progression</div>
       </div>
       <div class="nav-section"><div class="nav-label">Guidelines</div>
@@ -316,6 +336,7 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
         <div class="nav-item" onclick="showSection('scheduler')">Weekly Builder</div>
       </div>
       <div class="nav-section"><div class="nav-label">Reference</div>
+        <div class="nav-item" onclick="showSection('install')">Install the App</div>
         <div class="nav-item" onclick="showSection('faq')">FAQ</div>
         <div class="nav-item" onclick="showSection('legal')">Legal and Disclaimer</div>
         <div class="nav-item" onclick="showSection('contact')">Contact</div>
@@ -340,14 +361,35 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
         </div>
         <div id="rec-spacer" style="display:none;height:16px"></div>
 
+        <!-- DAILY FOCUS -->
+        <div id="daily-focus">
+          <div class="df-hdr">
+            <div class="df-hdr-left">
+              <div class="df-day-badge" id="df-day-badge">Monday</div>
+              <div class="df-title" id="df-title">Daily Focus</div>
+            </div>
+            <div class="df-date" id="df-date"></div>
+          </div>
+          <div class="df-body">
+            <div class="df-focus-label">Today's Focus</div>
+            <div class="df-focus-name" id="df-focus-name"></div>
+            <div class="df-focus-why" id="df-focus-why"></div>
+            <div class="df-exercises" id="df-exercises"></div>
+            <div class="df-cta">
+              <button class="df-nav-btn" id="df-nav-btn" onclick="">Go to Section</button>
+            </div>
+          </div>
+        </div>
+
         <!-- INSTALL BANNER -->
         <div class="install-banner" id="install-banner" style="margin-top:0;margin-bottom:0">
           <div class="install-icon">📱</div>
           <div style="flex:1">
-            <div class="install-title">Add to Your Home Screen</div>
+            <div class="install-title">Add to Your Home Screen — Works Like a Real App</div>
             <div class="install-steps">
-              <strong>iPhone:</strong> Tap the Share button (box with arrow) at the bottom of Safari, then tap <strong>Add to Home Screen</strong><br>
-              <strong>Android:</strong> Tap the three-dot menu in Chrome, then tap <strong>Add to Home Screen</strong>
+              <strong>iPhone/iPad:</strong> Open in Safari, tap the Share button (box with arrow) at the bottom, then tap <strong>Add to Home Screen</strong><br>
+              <strong>Android:</strong> Open in Chrome, tap the three-dot menu, then tap <strong>Add to Home Screen</strong><br>
+              <span style="color:#C9A84C;font-weight:700;">Tap <span onclick="showSection('install')" style="cursor:pointer;text-decoration:underline;">Install Guide</span> for step-by-step screenshots and instructions.</span>
             </div>
           </div>
           <button class="install-close" onclick="dismissInstall()">x</button>
@@ -376,7 +418,8 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
           <div class="home-card" onclick="showSection('principles')"><div class="icon">&#127919;</div><div class="name">Arm Care Principles</div><div class="desc">Long toss, weighted balls, intent vs. velocity</div><div class="tag">Foundation</div></div>
           <div class="home-card" onclick="showSection('gethot')"><div class="icon">&#128293;</div><div class="name">Get Hot Routine</div><div class="desc">Dynamic activation and arm ramp</div><div class="tag">Pre-Game</div></div>
           <div class="home-card" onclick="showSection('gameday')"><div class="icon">&#127918;</div><div class="name">Game Day Routines</div><div class="desc">SP, RP, Position Player, Catcher</div><div class="tag">Game Day</div></div>
-          <div class="home-card" onclick="showSection('mound')"><div class="icon">&#9968;</div><div class="name">Mound Progression</div><div class="desc">10-week bullpen build</div><div class="tag">Program</div></div>
+          <div class="home-card" onclick="showSection('longtoss')"><div class="icon">&#127947;</div><div class="name">Long Toss</div><div class="desc">Guidelines, crow hop mechanics, and distance standards</div><div class="tag">Program</div></div>
+                    <div class="home-card" onclick="showSection('mound')"><div class="icon">&#9968;</div><div class="name">Mound Progression</div><div class="desc">10-week bullpen build</div><div class="tag">Program</div></div>
         </div>
         <div class="home-group-label">Tools</div>
         <div class="home-grid">
@@ -797,6 +840,68 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
       </div>
 
 
+      <!-- LONG TOSS -->
+      <div class="section" id="sec-longtoss">
+        <div class="sec-eyebrow">Programs</div>
+        <h1 class="sec-title">Long Toss</h1>
+        <div class="sec-sub">Guidelines, mechanics, and standards for the throwing athlete</div>
+        <div class="gold-bar"></div>
+
+        <div class="callout callout-navy">Long toss is a tool — not a competition. When done correctly it builds arm strength, reinforces extension through the release point, and develops the tissue tolerance required for high-velocity throwing. When done incorrectly it accelerates fatigue and creates movement patterns that carry into competitive throwing.</div>
+
+        <div class="h2">Core Rules</div>
+        <ul class="clist">
+          <li>Build distance gradually — do not start at maximum distance</li>
+          <li>Crow hop mechanics on all line throws — not pull-downs unless specifically prescribed</li>
+          <li>120 feet is the standard ceiling for most high school athletes</li>
+          <li>150 feet is the absolute ceiling — only for advanced athletes with specific programming</li>
+          <li>Throwing on a line matters — excessive launch angles create poor habits that transfer to the mound</li>
+          <li>Long toss volume counts toward daily and weekly throw totals</li>
+          <li>Never use long toss as a substitute for a bullpen on a prescribed off day</li>
+          <li>Stop when the arm tells you to — not when you hit a distance target</li>
+        </ul>
+
+        <div class="h2">Crow Hop Mechanics</div>
+        <div class="prose">
+          <p>The crow hop is the foundation of long toss. It simulates the weight transfer, hip rotation, and drive mechanics of the pitching delivery in an open-air context. Every line throw during long toss should use crow hop mechanics unless otherwise prescribed.</p>
+        </div>
+        <table class="tbl">
+          <thead><tr><th>Phase</th><th>Key Points</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Load</strong></td><td>Gather weight on back leg, hip loaded, shoulders relaxed</td></tr>
+            <tr><td><strong>Step and Drive</strong></td><td>Step toward target, drive off back leg, stay closed as long as possible</td></tr>
+            <tr><td><strong>Hip to Shoulder Separation</strong></td><td>Hips rotate first, shoulders follow — same sequencing as the mound</td></tr>
+            <tr><td><strong>Extension</strong></td><td>Full arm extension through release, finish across the body</td></tr>
+            <tr><td><strong>Deceleration</strong></td><td>Follow through completely — the arm does not stop at release</td></tr>
+          </tbody>
+        </table>
+
+        <div class="h2">Distance Standards</div>
+        <div class="sb-card" style="grid-template-columns:repeat(3,1fr)">
+          <div class="sb-item"><div class="sb-lbl">Standard Ceiling</div><div class="sb-val">120 ft</div><div class="sb-note">Most HS athletes</div></div>
+          <div class="sb-item"><div class="sb-lbl">Absolute Ceiling</div><div class="sb-val">150 ft</div><div class="sb-note">Advanced only</div></div>
+          <div class="sb-item"><div class="sb-lbl">Build-Up Start</div><div class="sb-val">45 ft</div><div class="sb-note">Easy toss first</div></div>
+        </div>
+
+        <div class="h2">Sample Long Toss Progression</div>
+        <table class="tbl">
+          <thead><tr><th>Phase</th><th>Distance</th><th>Throws</th><th>Intent</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Warm-Up</strong></td><td>45-60 ft</td><td>10-15</td><td>40-50%</td><td>Easy toss, get arm moving</td></tr>
+            <tr><td><strong>Build</strong></td><td>60-90 ft</td><td>8-10</td><td>60-70%</td><td>Steady increase, crow hop</td></tr>
+            <tr><td><strong>Work</strong></td><td>90-120 ft</td><td>10-15</td><td>75-85%</td><td>Line throws, full crow hop</td></tr>
+            <tr><td><strong>Pull-Down</strong></td><td>60-90 ft</td><td>5-8</td><td>85-90%</td><td>Only if prescribed — not every session</td></tr>
+            <tr><td><strong>Finish</strong></td><td>45-60 ft</td><td>5-8</td><td>50-60%</td><td>Cool down, easy finish</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-warn" style="margin-top:16px"><span class="ct">Common Mistakes</span>
+          Starting at max distance without building up — throwing for distance instead of quality — excessive launch angles that do not translate to mound mechanics — skipping the cool-down phase — using long toss on days the arm needs rest.
+        </div>
+
+        <div class="callout callout-gold" style="margin-top:12px"><strong>Keep high days high and low days low.</strong> A long toss day is a high day. Treat it accordingly — full preparation, full post-throw routine, adequate recovery before the next session.</div>
+      </div>
+
       <!-- MOUND -->
       <div class="section" id="sec-mound">
         <div class="sec-eyebrow">Programs - Pitchers</div>
@@ -1037,6 +1142,107 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
   <div class="save-msg" id="sched-msg">Schedule saved</div>
 </div>
 
+      <!-- INSTALL -->
+      <div class="section" id="sec-install">
+        <div class="sec-eyebrow">Reference</div>
+        <h1 class="sec-title">Install the App</h1>
+        <div class="sec-sub">Add AAM Arm Care to your home screen — works like a real app, no App Store required</div>
+        <div class="gold-bar"></div>
+
+        <div class="callout callout-navy">When installed to your home screen this app opens full screen with its own icon and loads quickly — no browser bar, no extra steps. Install takes less than 60 seconds.</div>
+
+        <div class="h2">iPhone and iPad — Safari Only</div>
+        <div class="callout callout-gold"><strong>Important:</strong> This only works in Safari. If you are using Chrome or another browser on iPhone, switch to Safari first.</div>
+        <div class="std-grid" style="margin-top:16px">
+          <div class="std-card">
+            <div class="sct">Step 1</div>
+            <div class="scb">Open Safari on your iPhone or iPad and go to:<br><br><strong>mcannella20.github.io/aam-arm-care</strong></div>
+          </div>
+          <div class="std-card">
+            <div class="sct">Step 2</div>
+            <div class="scb">Tap the <strong>Share button</strong> at the bottom of the screen. It looks like a box with an arrow pointing up.</div>
+          </div>
+          <div class="std-card">
+            <div class="sct">Step 3</div>
+            <div class="scb">Scroll down in the share menu and tap <strong>Add to Home Screen</strong>.</div>
+          </div>
+          <div class="std-card">
+            <div class="sct">Step 4</div>
+            <div class="scb">Tap <strong>Add</strong> in the top right corner. The AAM icon will appear on your home screen.</div>
+          </div>
+          <div class="std-card">
+            <div class="sct">Step 5</div>
+            <div class="scb">Open the app from your home screen. Enter your access code: <strong>AAM2026</strong></div>
+          </div>
+          <div class="std-card">
+            <div class="sct">Done</div>
+            <div class="scb">The app opens full screen like a native app. Tap the icon any time to open it directly.</div>
+          </div>
+        </div>
+
+        <div class="h2" style="margin-top:28px">Android — Chrome</div>
+        <div class="std-grid">
+          <div class="std-card">
+            <div class="sct">Step 1</div>
+            <div class="scb">Open Chrome on your Android device and go to:<br><br><strong>mcannella20.github.io/aam-arm-care</strong></div>
+          </div>
+          <div class="std-card">
+            <div class="sct">Step 2</div>
+            <div class="scb">Tap the <strong>three-dot menu</strong> in the top right corner of Chrome.</div>
+          </div>
+          <div class="std-card">
+            <div class="sct">Step 3</div>
+            <div class="scb">Tap <strong>Add to Home Screen</strong> from the menu options.</div>
+          </div>
+          <div class="std-card">
+            <div class="sct">Step 4</div>
+            <div class="scb">Tap <strong>Add</strong> to confirm. The AAM icon will appear on your home screen.</div>
+          </div>
+          <div class="std-card">
+            <div class="sct">Step 5</div>
+            <div class="scb">Open the app from your home screen and enter: <strong>AAM2026</strong></div>
+          </div>
+          <div class="std-card">
+            <div class="sct">Done</div>
+            <div class="scb">The app opens full screen. Android may also show a banner at the bottom of Chrome prompting you to install — you can tap that as well.</div>
+          </div>
+        </div>
+
+        <div class="h2" style="margin-top:28px">Data and Privacy Notice</div>
+        <div class="callout callout-warn"><span class="ct">Important — Please Read</span>
+          <strong>All data entered in this app is stored only on the device you are using.</strong> This includes your arm readiness check-in history, volume tracker sessions, and weekly schedule. It is not uploaded to any server, not shared with any third party, and not accessible to AAM or anyone else.<br><br>
+          This also means:<br><br>
+          If you switch phones, get a new device, or clear your browser data, your logged history will not transfer and cannot be recovered.<br><br>
+          If you use the app on multiple devices — for example your phone and a tablet — each device maintains its own separate log. Data does not sync between devices.<br><br>
+          To preserve your log history, do not clear Safari or Chrome browser data for this site.
+        </div>
+
+        <div class="std-grid" style="margin-top:20px">
+          <div class="std-card">
+            <div class="sct" style="color:#1A6A1A">What Is Stored</div>
+            <ul class="clist">
+              <li>Arm readiness check-in history</li>
+              <li>Volume tracker session log</li>
+              <li>Weekly schedule you have built and saved</li>
+              <li>Install banner dismissed status</li>
+              <li>Daily popup last shown date</li>
+            </ul>
+          </div>
+          <div class="std-card">
+            <div class="sct" style="color:#C8402A">What Is NOT Stored</div>
+            <ul class="clist red">
+              <li>No personal information collected</li>
+              <li>No name, email, or contact details</li>
+              <li>No data uploaded to any server</li>
+              <li>No tracking or analytics</li>
+              <li>No data shared with third parties</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout callout-gold" style="margin-top:16px"><strong>Recommendation:</strong> After installing to your home screen, log your first arm readiness check-in right away. This starts your history and confirms the app is working correctly on your device.</div>
+      </div>
+
       <!-- FAQ -->
       <div class="section" id="sec-faq">
         <div class="sec-eyebrow">Reference</div>
@@ -1135,7 +1341,7 @@ document.getElementById('codeInput').onkeydown = function(e) { if (e.key === 'En
 document.querySelector('.gate-btn').addEventListener('click', function(e) { e.preventDefault(); checkCode(); });
 document.querySelector('.gate-btn').addEventListener('touchend', function(e) { e.preventDefault(); checkCode(); });
 
-var titles = {home:'Home',why:'Why Arm Care Matters',standards:'AAM Standards',redflags:'Red Flags',tspine:'T-Spine Mobility',foamroll:'Foam Roll',stretching:'Static Stretching',dynamic:'Dynamic Warm-Up',prebands:'Pre-Throw Bands',postbands:'Post-Throw Bands',scapular:'Scapular Control',twoout:'2-Out Drill',gethot:'Get Hot Routine',gameday:'Game Day Routines',mound:'Mound Progression',pitchcount:'Pitch Count Rules',recovery:'Recovery',youth:'Youth Arm Care',annual:'Annual Planning',throwingorder:'Daily Throwing Order',principles:'Arm Care Principles',readiness:'Arm Readiness Check',tracker:'Volume Tracker',scheduler:'Weekly Builder',faq:'FAQ',legal:'Legal and Disclaimer',contact:'Contact'};
+var titles = {home:'Home',why:'Why Arm Care Matters',standards:'AAM Standards',redflags:'Red Flags',tspine:'T-Spine Mobility',foamroll:'Foam Roll',stretching:'Static Stretching',dynamic:'Dynamic Warm-Up',prebands:'Pre-Throw Bands',postbands:'Post-Throw Bands',scapular:'Scapular Control',twoout:'2-Out Drill',gethot:'Get Hot Routine',gameday:'Game Day Routines',longtoss:'Long Toss',mound:'Mound Progression',pitchcount:'Pitch Count Rules',recovery:'Recovery',youth:'Youth Arm Care',annual:'Annual Planning',throwingorder:'Daily Throwing Order',principles:'Arm Care Principles',readiness:'Arm Readiness Check',tracker:'Volume Tracker',scheduler:'Weekly Builder',install:'Install the App',faq:'FAQ',legal:'Legal and Disclaimer',contact:'Contact'};
 
 function showSection(id) {
   document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
@@ -1353,6 +1559,7 @@ function initTools() {
   renderSchedule();
   renderWeeklySummary();
   checkInstallBanner();
+  buildDailyFocus();
   setTimeout(function() { showArmPopup(); }, 600);
 }
 
@@ -1429,6 +1636,149 @@ function checkInstallBanner() {
     var el = document.getElementById('install-banner');
     if (el) el.style.display = 'none';
   }
+}
+
+
+// DAILY FOCUS
+var dailyFocus = [
+  {
+    day: 'Sunday',
+    badge: 'Sunday',
+    title: 'Recovery and Restoration',
+    focus: 'Post-Throw Recovery',
+    why: 'Sunday is a recovery day. The goal is to reduce accumulated fatigue, maintain range of motion, and prepare the body for the week ahead. Complete your post-throw band routine and spend extra time on static stretching.',
+    exercises: [
+      { name: 'Post-Throw Bands', detail: '1 x 8 x 8-sec holds — full isometric series' },
+      { name: 'Modified Sleeper Stretch', detail: '3 x 30 sec each side' },
+      { name: 'Cross Body Stretch', detail: '3 x 30 sec each side' },
+      { name: 'Foam Roll — Full Body', detail: '15-30 sec per area' },
+    ],
+    section: 'postbands',
+    color: '#1A6A1A'
+  },
+  {
+    day: 'Monday',
+    badge: 'Monday',
+    title: 'T-Spine and Rotational Mobility',
+    focus: 'Thoracic Spine Mobility',
+    why: 'Monday sets the foundation for the week. Thoracic spine rotation is the engine of the throwing motion — restricted T-spine means the shoulder and elbow compensate. Prioritize this before any throwing begins today.',
+    exercises: [
+      { name: 'Foam Roll T-Spine Extension', detail: '15-30 sec each level' },
+      { name: 'Side Lying Open Books', detail: '1 x 10 each side' },
+      { name: 'Quadruped T-Spine Rotation', detail: '1 x 10 each side' },
+      { name: 'Quadruped Thread the Needle', detail: '1 x 10 each side' },
+      { name: 'Standing T-Spine Rotation', detail: '1 x 10 each side' },
+    ],
+    section: 'tspine',
+    color: '#C9A84C'
+  },
+  {
+    day: 'Tuesday',
+    badge: 'Tuesday',
+    title: 'Scapular Control and Stability',
+    focus: 'Scapular Control',
+    why: 'Tuesday focuses on the scapular stabilizers — the muscles that control position and movement of the shoulder blade throughout the throwing motion. Weak or poorly coordinated scapular stabilizers increase rotator cuff and labrum stress.',
+    exercises: [
+      { name: 'Blackburns — T, Y, ER', detail: '1 x 10 each' },
+      { name: 'Prone Shoulder Extension', detail: '1 x 10' },
+      { name: 'Kendalls', detail: '2 x 10' },
+      { name: 'Banded Y', detail: '2 x 10' },
+      { name: 'Reverse Bear Crawls', detail: '2 x 10 yards' },
+    ],
+    section: 'scapular',
+    color: '#2A4A8A'
+  },
+  {
+    day: 'Wednesday',
+    badge: 'Wednesday',
+    title: 'Pre-Throw Activation',
+    focus: 'J-Band Activation',
+    why: 'Wednesday is a throwing day for most athletes. The pre-throw band routine is the final activation step before any mound work. One set of eight reps per exercise — this is activation, not a workout. Complete it immediately before throwing.',
+    exercises: [
+      { name: 'Wrist Flexion and Extension', detail: '1 x 8 each' },
+      { name: 'Scaption', detail: '1 x 8' },
+      { name: 'Low Row and High Row', detail: '1 x 8 each' },
+      { name: 'I, Y, T Series', detail: '1 x 8 each' },
+      { name: 'Shoulder W Robber', detail: '1 x 8' },
+      { name: 'Overhead Lat Traction', detail: '1 x 8' },
+    ],
+    section: 'prebands',
+    color: '#C9A84C'
+  },
+  {
+    day: 'Thursday',
+    badge: 'Thursday',
+    title: 'Hip Mobility and Lower Half',
+    focus: 'Hip and Lower Half Mobility',
+    why: 'Thursday focuses on hip mobility — often the most overlooked part of arm care. Restricted hip rotation forces compensation through the trunk and shoulder. Power starts at the ground. A stiff lower half means the arm has to work harder.',
+    exercises: [
+      { name: 'Kneeling Hip Flexor Stretch', detail: '3 x 30 sec each side' },
+      { name: 'Frog Stretch', detail: '3 x 30 sec' },
+      { name: 'World's Greatest Stretch', detail: '1 x 10 each side' },
+      { name: 'Lateral Lunge', detail: '1 x 15 yards' },
+      { name: 'Reverse Lunge with Rotation', detail: '1 x 15 yards' },
+    ],
+    section: 'stretching',
+    color: '#8A4A10'
+  },
+  {
+    day: 'Friday',
+    badge: 'Friday',
+    title: 'Posterior Shoulder Maintenance',
+    focus: 'Shoulder ROM Maintenance',
+    why: 'Throwing athletes consistently lose internal rotation over the course of a season. Friday is dedicated to maintaining posterior shoulder mobility — the sleeper stretch and cross body stretch are the two most important exercises for this. Be patient and never force range of motion.',
+    exercises: [
+      { name: 'Modified Sleeper Stretch', detail: '3 x 30 sec — shoulders stacked, no pain' },
+      { name: 'Modified Cross Body Stretch', detail: '3 x 30 sec each side' },
+      { name: 'Doorway Pec Stretch', detail: '3 x 30 sec at multiple angles' },
+      { name: 'Corner Stretch', detail: '3 x 30 sec' },
+      { name: 'Post-Throw Bands', detail: 'Full isometric series after any throwing' },
+    ],
+    section: 'stretching',
+    color: '#1A4A7A'
+  },
+  {
+    day: 'Saturday',
+    badge: 'Saturday',
+    title: 'Game Day Preparation',
+    focus: 'Game Day Routine',
+    why: 'Saturday is competition day. Complete your full dynamic warm-up and pre-throw band routine before any throwing begins. Every throw before competition is a throw spent — stop throwing when you are warm, not when you feel like throwing more.',
+    exercises: [
+      { name: 'Full Dynamic Warm-Up', detail: 'Complete sequence — do not skip steps' },
+      { name: 'Pre-Throw Bands', detail: '1 x 8 each — activation only' },
+      { name: 'Easy Flat Ground', detail: 'Build to position distance at 50-70%' },
+      { name: 'Position-Specific Throws', detail: '80-90% intent — stop when warm' },
+      { name: '2-Out Drill', detail: 'Between every inning on the mound' },
+    ],
+    section: 'gameday',
+    color: '#C9A84C'
+  }
+];
+
+function buildDailyFocus() {
+  var el = document.getElementById('daily-focus');
+  if (!el) return;
+  var day = new Date().getDay(); // 0=Sun
+  var focus = dailyFocus[day];
+  if (!focus) return;
+
+  document.getElementById('df-day-badge').textContent = focus.badge;
+  document.getElementById('df-day-badge').style.background = focus.color;
+  document.getElementById('df-title').textContent = focus.title;
+  document.getElementById('df-focus-name').textContent = focus.focus;
+  document.getElementById('df-focus-why').textContent = focus.why;
+  document.getElementById('df-date').textContent = new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+
+  var exEl = document.getElementById('df-exercises');
+  exEl.innerHTML = focus.exercises.map(function(e) {
+    return '<div class="df-ex"><div class="df-ex-name">' + e.name + '</div><div class="df-ex-detail">' + e.detail + '</div></div>';
+  }).join('');
+
+  var btn = document.getElementById('df-nav-btn');
+  btn.onclick = function() { showSection(focus.section); };
+  btn.textContent = 'Go to ' + focus.focus;
+
+  el.style.display = 'block';
 }
 
 </script>

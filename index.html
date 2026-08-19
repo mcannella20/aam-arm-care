@@ -214,6 +214,17 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
 .tb-privacy-note { font-size: 12px; color: #7A7A85; margin-top: 10px; line-height: 1.6; }
 .tb-privacy-note strong { color: #4A4A52; }
 
+.wb-table { min-width: 760px; }
+.wb-table th { background: #1A2F4E; color: #fff; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; padding: 9px 6px; text-align: center; }
+.wb-table td { border: 1px solid #E8E4DC; padding: 7px 8px; font-size: 13px; color: #1C1C1E; text-align: center; min-width: 92px; vertical-align: middle; }
+.wb-table td[contenteditable="true"] { cursor: text; }
+.wb-table td[contenteditable="true"]:focus { outline: 2px solid #C9A84C; outline-offset: -2px; background: #FDFBF4; }
+.wb-section-row td { background: #0F1E35 !important; color: #fff; font-weight: 700; font-size: 13px; text-align: center; padding: 8px 10px; }
+.wb-notes-cell { text-align: left !important; min-height: 60px; }
+.wb-addrow-row td { background: #FAFAF8; border: 1px solid #E8E4DC; padding: 6px; text-align: left; }
+.wb-addrow-btn { background: none; border: 1px dashed #C9A84C; color: #7A6000; font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 3px; cursor: pointer; font-family: Arial, sans-serif; }
+.wb-addrow-btn:hover { background: #FDFBF4; }
+
 #arm-popup { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:500; align-items:center; justify-content:center; }
 #arm-popup.show { display:flex; }
 .popup-box { background:#fff; border-radius:8px; width:min(380px,90vw); overflow:hidden; box-shadow:0 8px 40px rgba(0,0,0,0.3); }
@@ -1226,23 +1237,12 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
       <div class="section" id="sec-scheduler">
   <div class="sec-eyebrow">Tools</div>
   <h1 class="sec-title">Weekly Arm Care Builder</h1>
+  <div class="sec-sub">Matches the AAM Arm Care Throwing and Recovery Schedule format &mdash; tap any cell to edit</div>
   <div class="gold-bar"></div>
-  <div id="saved-sched-display"></div>
-  <div class="h2">AAM Sample Weekly Plan</div>
-  <div style="overflow-x:auto">
-  <table class="tbl" style="min-width:650px"><thead><tr><th></th><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead><tbody>
-    <tr><td><strong>Warm-Up</strong></td><td>T-Spine Foam Roll</td><td>T-Spine Foam Roll</td><td>T-Spine Foam Roll</td><td>T-Spine Foam Roll</td><td>T-Spine Foam Roll</td><td>T-Spine Foam Roll</td><td>T-Spine Foam Roll</td></tr>
-    <tr><td><strong>Pre-Throw</strong></td><td>-</td><td>Bands Rev Throws</td><td>Pre-Throw Bands</td><td>-</td><td>Pre-Throw Bands</td><td>Pre-Throw Bands</td><td>Pre-Throw Bands</td></tr>
-    <tr><td><strong>Throwing</strong></td><td>Off</td><td>Long Toss 120ft</td><td>Bullpen</td><td>Off</td><td>Short Box</td><td>Long Toss 120ft</td><td>Bullpen or Game</td></tr>
-    <tr><td><strong>Post-Throw</strong></td><td>-</td><td>Isometric Holds</td><td>Isometric Holds</td><td>-</td><td>Isometric Holds</td><td>Isometric Holds</td><td>Isometric Holds</td></tr>
-    <tr><td><strong>Treatment</strong></td><td>Recovery</td><td>Rehab</td><td>Plyo</td><td>Recovery</td><td>Plyo</td><td>Rehab</td><td>-</td></tr>
-  </tbody></table>
-  </div>
-  <div class="h2">Build Your Own Schedule</div>
-  <div class="sched-grid" id="sched-builder"></div>
+  <div class="tb-table-wrap" id="wb-table-wrap"></div>
   <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
-    <button class="btn-primary" onclick="saveSchedule()">Save My Schedule</button>
-    <button class="btn-secondary" onclick="resetSchedule()">Reset</button>
+    <button class="btn-primary" onclick="wbSave()">Save My Schedule</button>
+    <button class="btn-secondary" onclick="wbReset()">Reset to AAM Template</button>
   </div>
   <div class="save-msg" id="sched-msg">Schedule saved</div>
 </div>
@@ -1763,43 +1763,92 @@ function exportCSV() {
 }
 
 // WEEKLY BUILDER
-var schedDays = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-var schedActivities = ['T-Spine Mobility','Foam Roll','Static Stretch','Dynamic WU','Pre-Throw Bands','Post-Throw Bands','Long Toss','Bullpen','Short Box','Catch','Game','Rest Day'];
-function buildSchedUI() {
-  var el = document.getElementById('sched-builder');
-  if (!el) return;
-  var saved = JSON.parse(localStorage.getItem('aamSchedule') || '{}');
-  el.innerHTML = schedDays.map(function(d) {
-    var checks = schedActivities.map(function(a) {
-      var checked = saved[d] && saved[d].indexOf(a) >= 0 ? 'checked' : '';
-      return '<label class="sched-check"><input type="checkbox" data-day="' + d + '" data-act="' + a + '" ' + checked + '> ' + a + '</label>';
-    }).join('');
-    return '<div class="sched-day"><div class="sched-hdr">' + d + '</div><div class="sched-body">' + checks + '</div></div>';
-  }).join('');
+var wbDays = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+var wbDefaultSections = [
+  { name: 'Treatment/ Rehab', freeform: false, rows: [['Recovery/ Off','Rehab','Plyo','Recovery','Plyo','Rehab','No Rehab']] },
+  { name: 'Strength & Conditioning', freeform: false, rows: [['','','','','','','']] },
+  { name: 'Warm-Up', freeform: false, rows: [
+      ['T-Spine','T-Spine','T-Spine','T-Spine','T-Spine','T-Spine','T-Spine'],
+      ['Foam Roll','Foam Roll','Foam Roll','Foam Roll','Foam Roll','Foam Roll','Foam Roll'],
+      ['Hip Mobility','Hip Mobility','Hip Mobility','Hip Mobility','Hip Mobility','Hip Mobility','Hip Mobility'],
+      ['Stretch','Banded Stretch','Banded Stretch','Stretch','Banded Stretch','Banded Stretch','Banded Stretch']
+  ]},
+  { name: 'Activation', freeform: false, rows: [['','','Glute, Infraspinatus','','','','Infraspinatus']] },
+  { name: 'Pre-Throwing', freeform: false, rows: [
+      ['','Bands','Pre Throw Bands','','Pre Throw Bands','Pre Throw Bands','Pre Throw Bands'],
+      ['','Rev Throws','Rev Throws','','Rev Throws','Rev Throws','Rev Throws']
+  ]},
+  { name: 'Throwing', freeform: false, rows: [['Off',"Long Toss '120",'Bullpen','Off','Short Box',"Long Toss '120",'Bullpen']] },
+  { name: 'Post Throw', freeform: false, rows: [['Off','Isometric Holds','Isometric Holds','Off','Isometric Holds','Isometric Holds','Isometric Holds']] },
+  { name: 'Hitting', freeform: false, rows: [['','','','','','','']] },
+  { name: 'Fielding', freeform: false, rows: [['','','','','','','']] },
+  { name: 'Arm Care Specific', freeform: false, rows: [['','','','','','',''],['','','','','','',''],['','','','','','','']] },
+  { name: 'Notes', freeform: true, rows: [['']] },
+  { name: 'Throwing Progression', freeform: false, rows: [['','','','','','',''],['','','','','','',''],['','','','','','',''],['','','','','','','']] }
+];
+
+function wbLoad() {
+  try {
+    var raw = localStorage.getItem('aamWeeklyPlan');
+    if (!raw) return JSON.parse(JSON.stringify(wbDefaultSections));
+    var parsed = JSON.parse(raw);
+    return parsed && parsed.sections ? parsed.sections : JSON.parse(JSON.stringify(wbDefaultSections));
+  } catch (e) {
+    return JSON.parse(JSON.stringify(wbDefaultSections));
+  }
 }
-function saveSchedule() {
-  var sched = {};
-  document.querySelectorAll('#sched-builder input:checked').forEach(function(cb) {
-    var d = cb.dataset.day, a = cb.dataset.act;
-    if (!sched[d]) sched[d] = [];
-    sched[d].push(a);
+
+function wbRenderTable() {
+  var wrap = document.getElementById('wb-table-wrap');
+  if (!wrap) return;
+  var sections = wbLoad();
+  var html = '<table class="tbl wb-table"><thead><tr>' + wbDays.map(function(d) { return '<th>' + d + '</th>'; }).join('') + '</tr></thead><tbody>';
+  sections.forEach(function(sec, si) {
+    html += '<tr class="wb-section-row"><td colspan="7">' + sec.name + '</td></tr>';
+    sec.rows.forEach(function(row, ri) {
+      if (sec.freeform) {
+        html += '<tr><td colspan="7" contenteditable="true" class="wb-notes-cell" data-si="' + si + '" data-ri="' + ri + '" data-ci="0">' + (row[0] || '') + '</td></tr>';
+      } else {
+        html += '<tr>' + row.map(function(v, ci) {
+          return '<td contenteditable="true" data-si="' + si + '" data-ri="' + ri + '" data-ci="' + ci + '">' + (v || '') + '</td>';
+        }).join('') + '</tr>';
+      }
+    });
+    html += '<tr class="wb-addrow-row"><td colspan="7"><button type="button" class="wb-addrow-btn" onclick="wbAddRow(' + si + ')">+ Add Row</button></td></tr>';
   });
-  localStorage.setItem('aamSchedule', JSON.stringify(sched));
-  renderSchedule();
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+function wbAddRow(si) {
+  var sections = wbLoad();
+  var sec = sections[si];
+  if (!sec) return;
+  sec.rows.push(sec.freeform ? [''] : ['','','','','','','']);
+  localStorage.setItem('aamWeeklyPlan', JSON.stringify({ sections: sections }));
+  wbRenderTable();
+}
+
+function wbSave() {
+  var sections = wbLoad();
+  document.querySelectorAll('#wb-table-wrap td[contenteditable="true"]').forEach(function(td) {
+    var si = parseInt(td.getAttribute('data-si'), 10);
+    var ri = parseInt(td.getAttribute('data-ri'), 10);
+    var ci = parseInt(td.getAttribute('data-ci'), 10) || 0;
+    if (sections[si] && sections[si].rows[ri]) sections[si].rows[ri][ci] = td.textContent;
+  });
+  localStorage.setItem('aamWeeklyPlan', JSON.stringify({ sections: sections }));
   renderHomeSchedule();
   var msg = document.getElementById('sched-msg');
   msg.style.display = 'block';
   setTimeout(function() { msg.style.display = 'none'; }, 2000);
 }
-function resetSchedule() { localStorage.removeItem('aamSchedule'); buildSchedUI(); renderSchedule(); }
-function renderSchedule() {
-  var el = document.getElementById('saved-sched-display');
-  if (!el) return;
-  var sched = JSON.parse(localStorage.getItem('aamSchedule') || '{}');
-  if (!Object.keys(sched).length) { el.innerHTML = ''; buildSchedUI(); return; }
-  var lines = schedDays.map(function(d) { return '<strong>' + d + ':</strong> ' + (sched[d] && sched[d].length ? sched[d].join(', ') : 'Off'); }).join('<br>');
-  el.innerHTML = '<div class="saved-sched"><strong>My Saved Schedule</strong><br><br>' + lines + '</div>';
-  buildSchedUI();
+
+function wbReset() {
+  if (!confirm("Reset to the default AAM template? This clears anything you've customized.")) return;
+  localStorage.removeItem('aamWeeklyPlan');
+  wbRenderTable();
+  renderHomeSchedule();
 }
 
 // INIT ON LOGIN
@@ -1807,7 +1856,7 @@ function initTools() {
   initDate();
   renderLog();
   renderReadiness();
-  renderSchedule();
+  wbRenderTable();
   renderWeeklySummary();
   checkInstallBanner();
   buildDailyFocus();
@@ -2037,22 +2086,32 @@ function buildDailyFocus() {
 
 
 // HOME SCHEDULE CARD
-var schedDaysOrder = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 function renderHomeSchedule() {
   var card = document.getElementById('home-schedule-card');
   var spacer = document.getElementById('hsc-spacer');
   var grid = document.getElementById('hsc-grid');
   if (!card || !grid) return;
-  var sched = JSON.parse(localStorage.getItem('aamSchedule') || '{}');
-  if (!Object.keys(sched).length) {
+  var raw = localStorage.getItem('aamWeeklyPlan');
+  if (!raw) {
     card.style.display = 'none';
     if (spacer) spacer.style.display = 'none';
     return;
   }
-  grid.innerHTML = schedDaysOrder.map(function(d) {
-    var items = sched[d] && sched[d].length ? sched[d] : null;
-    var itemsHtml = items
-      ? items.map(function(a) { return '<div class="hsc-day-item">' + a + '</div>'; }).join('')
+  var sections;
+  try { sections = JSON.parse(raw).sections; } catch (e) { sections = null; }
+  if (!sections) {
+    card.style.display = 'none';
+    if (spacer) spacer.style.display = 'none';
+    return;
+  }
+  var throwSec = sections.filter(function(s) { return s.name === 'Throwing'; })[0];
+  grid.innerHTML = wbDays.map(function(d, i) {
+    var vals = [];
+    if (throwSec) {
+      throwSec.rows.forEach(function(row) { if (row[i]) vals.push(row[i]); });
+    }
+    var itemsHtml = vals.length
+      ? vals.map(function(a) { return '<div class="hsc-day-item">' + a + '</div>'; }).join('')
       : '<div class="hsc-day-off">Off</div>';
     return '<div class="hsc-day"><div class="hsc-day-name">' + d + '</div><div class="hsc-day-items">' + itemsHtml + '</div></div>';
   }).join('');

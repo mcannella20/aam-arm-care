@@ -224,6 +224,9 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
 .wb-addrow-row td { background: #FAFAF8; border: 1px solid #E8E4DC; padding: 6px; text-align: left; }
 .wb-addrow-btn { background: none; border: 1px dashed #C9A84C; color: #7A6000; font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 3px; cursor: pointer; font-family: Arial, sans-serif; }
 .wb-addrow-btn:hover { background: #FDFBF4; }
+.wb-select { width: 100%; font-family: Arial, sans-serif; font-size: 12px; border: 1px solid #E8E4DC; border-radius: 3px; padding: 6px 4px; background: #fff; color: #1C1C1E; }
+.wb-select:focus { outline: 2px solid #C9A84C; outline-offset: -2px; }
+.wb-other-input { width: 100%; margin-top: 5px; font-family: Arial, sans-serif; font-size: 12px; border: 1px solid #C9A84C; border-radius: 3px; padding: 6px 6px; background: #FDFBF4; color: #1C1C1E; }
 
 #arm-popup { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:500; align-items:center; justify-content:center; }
 #arm-popup.show { display:flex; }
@@ -1773,7 +1776,7 @@ var wbDefaultSections = [
       ['Hip Mobility','Hip Mobility','Hip Mobility','Hip Mobility','Hip Mobility','Hip Mobility','Hip Mobility'],
       ['Stretch','Banded Stretch','Banded Stretch','Stretch','Banded Stretch','Banded Stretch','Banded Stretch']
   ]},
-  { name: 'Activation', freeform: false, rows: [['','','Glute, Infraspinatus','','','','Infraspinatus']] },
+  { name: 'Activation', freeform: false, rows: [['','','','','','','']] },
   { name: 'Pre-Throwing', freeform: false, rows: [
       ['','Bands','Pre Throw Bands','','Pre Throw Bands','Pre Throw Bands','Pre Throw Bands'],
       ['','Rev Throws','Rev Throws','','Rev Throws','Rev Throws','Rev Throws']
@@ -1786,6 +1789,22 @@ var wbDefaultSections = [
   { name: 'Notes', freeform: true, rows: [['']] },
   { name: 'Throwing Progression', freeform: false, rows: [['','','','','','',''],['','','','','','',''],['','','','','','',''],['','','','','','','']] }
 ];
+
+var WB_OTHER = '__other__';
+var wbOptionsBySection = {
+  'Treatment/ Rehab': ['Recovery/ Off','Recovery','Rehab','Plyo','No Rehab','Massage','Dry Needling','MFD','BFR'],
+  'Strength & Conditioning': ['Off','Lower Body','Upper Body','Full Body','Mobility Only'],
+  'Warm-Up': ['T-Spine','Foam Roll','Hip Mobility','Stretch','Banded Stretch','Dynamic Warm-Up'],
+  'Pre-Throwing': ['Bands','Pre Throw Bands','Rev Throws','Dynamic Warm-Up'],
+  'Throwing': ['Off', "Long Toss '120", 'Bullpen', 'Short Box', 'Catch', 'Game', 'Flat Ground'],
+  'Post Throw': ['Off','Isometric Holds','Post-Throw Bands','Ice'],
+  'Hitting': ['Off','Cage Work','Live BP','Tee Work','Front Toss'],
+  'Fielding': ['Off','Ground Balls','Fly Balls','Team Defense'],
+  'Arm Care Specific': ['2-Out Drill','Get Hot Routine','Weighted Ball','Scapular Control','Band Series'],
+  'Throwing Progression': ['Flat Ground','Long Toss','Bullpen','Mound','Rest']
+};
+function wbGetOptions(sectionName) { return wbOptionsBySection[sectionName] || ['Off','Complete','N/A']; }
+function wbEsc(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function wbLoad() {
   try {
@@ -1809,8 +1828,16 @@ function wbRenderTable() {
       if (sec.freeform) {
         html += '<tr><td colspan="7" contenteditable="true" class="wb-notes-cell" data-si="' + si + '" data-ri="' + ri + '" data-ci="0">' + (row[0] || '') + '</td></tr>';
       } else {
+        var opts = wbGetOptions(sec.name);
         html += '<tr>' + row.map(function(v, ci) {
-          return '<td contenteditable="true" data-si="' + si + '" data-ri="' + ri + '" data-ci="' + ci + '">' + (v || '') + '</td>';
+          var isOther = !!v && opts.indexOf(v) === -1;
+          var selectHtml = '<select class="wb-select" data-si="' + si + '" data-ri="' + ri + '" data-ci="' + ci + '" onchange="wbSelectChange(this)">'
+            + '<option value=""' + (!v ? ' selected' : '') + '>-</option>'
+            + opts.map(function(o) { return '<option value="' + wbEsc(o) + '"' + (v === o ? ' selected' : '') + '>' + wbEsc(o) + '</option>'; }).join('')
+            + '<option value="' + WB_OTHER + '"' + (isOther ? ' selected' : '') + '>Other...</option>'
+            + '</select>';
+          var otherHtml = '<input type="text" class="wb-other-input" placeholder="Custom entry" value="' + (isOther ? wbEsc(v) : '') + '" style="display:' + (isOther ? 'block' : 'none') + '">';
+          return '<td>' + selectHtml + otherHtml + '</td>';
         }).join('') + '</tr>';
       }
     });
@@ -1818,6 +1845,19 @@ function wbRenderTable() {
   });
   html += '</tbody></table>';
   wrap.innerHTML = html;
+}
+
+function wbSelectChange(sel) {
+  var td = sel.closest('td');
+  var otherInput = td.querySelector('.wb-other-input');
+  if (!otherInput) return;
+  if (sel.value === WB_OTHER) {
+    otherInput.style.display = 'block';
+    otherInput.focus();
+  } else {
+    otherInput.style.display = 'none';
+    otherInput.value = '';
+  }
 }
 
 function wbAddRow(si) {
@@ -1831,7 +1871,18 @@ function wbAddRow(si) {
 
 function wbSave() {
   var sections = wbLoad();
-  document.querySelectorAll('#wb-table-wrap td[contenteditable="true"]').forEach(function(td) {
+  document.querySelectorAll('#wb-table-wrap select.wb-select').forEach(function(sel) {
+    var si = parseInt(sel.getAttribute('data-si'), 10);
+    var ri = parseInt(sel.getAttribute('data-ri'), 10);
+    var ci = parseInt(sel.getAttribute('data-ci'), 10) || 0;
+    var val = sel.value;
+    if (val === WB_OTHER) {
+      var otherInput = sel.closest('td').querySelector('.wb-other-input');
+      val = otherInput ? otherInput.value.trim() : '';
+    }
+    if (sections[si] && sections[si].rows[ri]) sections[si].rows[ri][ci] = val;
+  });
+  document.querySelectorAll('#wb-table-wrap td.wb-notes-cell[contenteditable="true"]').forEach(function(td) {
     var si = parseInt(td.getAttribute('data-si'), 10);
     var ri = parseInt(td.getAttribute('data-ri'), 10);
     var ci = parseInt(td.getAttribute('data-ci'), 10) || 0;

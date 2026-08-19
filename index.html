@@ -293,13 +293,13 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
 .hsc-hdr-title { color:#fff; font-size:14px; font-weight:700; }
 .hsc-edit { background:none; border:1px solid rgba(255,255,255,0.3); color:#fff; font-family:Arial,sans-serif; font-size:11px; font-weight:700; padding:5px 12px; border-radius:3px; cursor:pointer; }
 .hsc-body { padding:14px 20px; }
-.hsc-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
-.hsc-day { text-align:center; }
-.hsc-day-name { font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#1A6A1A; margin-bottom:4px; }
-.hsc-day-items { display:flex; flex-direction:column; gap:3px; }
-.hsc-day-item { background:#fff; border:1px solid #B0D8B0; border-radius:2px; font-size:9px; color:#1C1C1E; padding:3px 4px; text-align:center; line-height:1.3; }
-.hsc-day-off { font-size:10px; color:#7A9A7A; text-align:center; padding:4px 0; font-style:italic; }
-@media (max-width:700px) { #home-schedule-card { margin:0 16px 0; } .hsc-grid { grid-template-columns:repeat(4,1fr); } }
+.hsc-list { display:flex; flex-direction:column; gap:8px; }
+.hsc-row { display:flex; gap:10px; align-items:flex-start; }
+.hsc-row-label { flex-shrink:0; width:110px; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#1A6A1A; padding-top:2px; }
+.hsc-row-items { display:flex; flex-wrap:wrap; gap:5px; flex:1; }
+.hsc-row-item { background:#fff; border:1px solid #B0D8B0; border-radius:3px; font-size:12px; color:#1C1C1E; padding:4px 9px; line-height:1.3; }
+.hsc-off { font-size:12px; color:#4A6A4A; font-style:italic; padding:4px 0; }
+@media (max-width:700px) { #home-schedule-card { margin:0 16px 0; } .hsc-row-label { width:90px; font-size:9px; } }
 
 #tm-popup { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:600; align-items:center; justify-content:center; }
 #tm-popup.show { display:flex; }
@@ -471,11 +471,11 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
         <!-- HOME SCHEDULE CARD -->
         <div id="home-schedule-card">
           <div class="hsc-hdr">
-            <div class="hsc-hdr-title">My Weekly Schedule</div>
+            <div class="hsc-hdr-title" id="hsc-hdr-title">Today's Plan</div>
             <button class="hsc-edit" onclick="showSection('scheduler')">Edit Schedule</button>
           </div>
           <div class="hsc-body">
-            <div class="hsc-grid" id="hsc-grid"></div>
+            <div class="hsc-list" id="hsc-list"></div>
           </div>
         </div>
         <div id="hsc-spacer" style="display:none;height:16px"></div>
@@ -2140,8 +2140,9 @@ function buildDailyFocus() {
 function renderHomeSchedule() {
   var card = document.getElementById('home-schedule-card');
   var spacer = document.getElementById('hsc-spacer');
-  var grid = document.getElementById('hsc-grid');
-  if (!card || !grid) return;
+  var list = document.getElementById('hsc-list');
+  var hdrTitle = document.getElementById('hsc-hdr-title');
+  if (!card || !list) return;
   var raw = localStorage.getItem('aamWeeklyPlan');
   if (!raw) {
     card.style.display = 'none';
@@ -2155,17 +2156,20 @@ function renderHomeSchedule() {
     if (spacer) spacer.style.display = 'none';
     return;
   }
-  var throwSec = sections.filter(function(s) { return s.name === 'Throwing'; })[0];
-  grid.innerHTML = wbDays.map(function(d, i) {
+  var todayIdx = new Date().getDay(); // 0=Sun matches wbDays index
+  var fullDayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+  if (hdrTitle) hdrTitle.textContent = "Today's Plan \u2014 " + fullDayName;
+
+  var rowsHtml = sections.map(function(sec) {
+    if (sec.freeform) return ''; // skip Notes - not day-specific
     var vals = [];
-    if (throwSec) {
-      throwSec.rows.forEach(function(row) { if (row[i]) vals.push(row[i]); });
-    }
-    var itemsHtml = vals.length
-      ? vals.map(function(a) { return '<div class="hsc-day-item">' + a + '</div>'; }).join('')
-      : '<div class="hsc-day-off">Off</div>';
-    return '<div class="hsc-day"><div class="hsc-day-name">' + d + '</div><div class="hsc-day-items">' + itemsHtml + '</div></div>';
+    sec.rows.forEach(function(row) { if (row[todayIdx]) vals.push(row[todayIdx]); });
+    if (!vals.length) return '';
+    var itemsHtml = vals.map(function(v) { return '<div class="hsc-row-item">' + v + '</div>'; }).join('');
+    return '<div class="hsc-row"><div class="hsc-row-label">' + sec.name + '</div><div class="hsc-row-items">' + itemsHtml + '</div></div>';
   }).join('');
+
+  list.innerHTML = rowsHtml || '<div class="hsc-off">Nothing scheduled for today.</div>';
   card.style.display = 'block';
   if (spacer) spacer.style.display = 'block';
 }

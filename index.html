@@ -1797,6 +1797,13 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
             <button class="btn-primary" onclick="generateArmScreenPDF()" style="width:100%;padding:16px;font-size:14px">Generate PDF Document</button>
             <button class="btn-secondary" onclick="showSection('home')" style="width:100%">Back to Home</button>
             <p style="font-size:12px;color:#7A7A85;margin-top:4px;text-align:center">Opens a print dialog — select Save as PDF to save to the athlete chart</p>
+            <div id="as-done-banner" style="display:none;margin-top:12px;background:#F0FAF0;border:1px solid #B0D8B0;border-left:4px solid #1A6A1A;border-radius:6px;padding:14px 18px;align-items:center;justify-content:space-between;gap:12px">
+              <div>
+                <div style="font-weight:700;color:#1A6A1A;font-size:14px;margin-bottom:2px">PDF Generated</div>
+                <div style="font-size:12px;color:#4A4A52">Select Save as PDF in the print dialog.</div>
+              </div>
+              <button class="btn-primary" onclick="showSection('home');document.getElementById('as-done-banner').style.display='none';">Back to Home</button>
+            </div>
           </div>
 
         </div>
@@ -1875,6 +1882,16 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
             <button class="btn-secondary" onclick="showSection('home')">Back to Home</button>
           </div>
           <p style="font-size:12px;color:#7A7A85;margin-top:8px;text-align:center">Opens print dialog — select Save as PDF to save to athlete chart</p>
+          <div id="pb-done-banner" style="display:none;margin-top:16px;background:#F0FAF0;border:1px solid #B0D8B0;border-left:4px solid #1A6A1A;border-radius:6px;padding:16px 20px;align-items:center;justify-content:space-between;gap:12px">
+            <div>
+              <div style="font-weight:700;color:#1A6A1A;font-size:14px;margin-bottom:3px">PDF Generated</div>
+              <div style="font-size:12px;color:#4A4A52">Select Save as PDF in the print dialog to save to the athlete chart.</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-shrink:0">
+              <button class="btn-secondary" onclick="generateProgPDF()">Generate Again</button>
+              <button class="btn-primary" onclick="showSection('home');document.getElementById('pb-done-banner').style.display='none';">Back to Home</button>
+            </div>
+          </div>
 
         </div>
       </div>
@@ -3299,6 +3316,8 @@ function generateArmScreenPDF() {
   win.document.write('</body></html>');
   win.document.close();
   setTimeout(function() { win.print(); }, 500);
+  var banner = document.getElementById('as-done-banner');
+  if (banner) banner.style.display = 'flex';
 }
 
 var EX_LIB = [
@@ -3617,6 +3636,9 @@ function generateProgPDF() {
   win.document.write('</body></html>');
   win.document.close();
   setTimeout(function(){ win.print(); }, 600);
+  // Show done banner
+  var banner = document.getElementById('pb-done-banner');
+  if (banner) banner.style.display = 'flex';
 }
 
 </script>

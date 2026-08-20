@@ -226,6 +226,19 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
 .wb-addrow-btn:hover { background: #FDFBF4; }
 .wb-select { width: 100%; font-family: Arial, sans-serif; font-size: 12px; border: 1px solid #E8E4DC; border-radius: 3px; padding: 6px 4px; background: #fff; color: #1C1C1E; }
 .wb-select:focus { outline: 2px solid #C9A84C; outline-offset: -2px; }
+.pb-cat-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 14px 0; }
+.pb-cat-tab { padding: 6px 12px; border: 1px solid #E8E4DC; border-radius: 14px; font-size: 11px; font-weight: 700; color: #4A4A52; cursor: pointer; background: #fff; }
+.pb-cat-tab.active { background: #0F1E35; color: #C9A84C; border-color: #0F1E35; }
+.pb-ex-card { position: relative; }
+.pb-ex-card.selected { outline: 3px solid #C9A84C; outline-offset: -3px; }
+.pb-add-check { position: absolute; top: 8px; right: 8px; z-index: 5; width: 26px; height: 26px; border-radius: 50%; background: rgba(15,30,53,0.85); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 15px; cursor: pointer; }
+.pb-ex-card.selected .pb-add-check { background: #C9A84C; color: #0F1E35; }
+.pb-program-list { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.pb-program-item { display: flex; align-items: center; gap: 10px; background: #fff; border: 1px solid #E8E4DC; border-radius: 4px; padding: 10px 12px; }
+.pb-program-item .pb-pname { flex: 1; font-size: 13px; font-weight: 700; color: #1C1C1E; }
+.pb-program-item input.pb-sets-input { width: 90px; font-size: 12px; padding: 5px 6px; border: 1px solid #E8E4DC; border-radius: 3px; font-family: Arial, sans-serif; }
+.pb-remove-btn { background: none; border: none; color: #C8402A; font-size: 18px; cursor: pointer; padding: 0 4px; }
+.pb-empty-note { color: #7A7A85; font-size: 13px; padding: 10px 0; }
 .wb-other-input { width: 100%; margin-top: 5px; font-family: Arial, sans-serif; font-size: 12px; border: 1px solid #C9A84C; border-radius: 3px; padding: 6px 6px; background: #FDFBF4; color: #1C1C1E; }
 
 #arm-popup { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:500; align-items:center; justify-content:center; }
@@ -352,6 +365,11 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
 .pb-ctrl-in:focus{border-color:#C9A84C}
 .pb-instr{font-size:11px;color:#7A7A85;margin-top:6px;line-height:1.5}
 @media(max-width:700px){#progbuilder-form>div[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr}}
+
+.rom-input{width:100%;background:#FAFAF8;border:1px solid #E8E4DC;color:#1C1C1E;font-family:Arial,sans-serif;font-size:13px;padding:6px 8px;border-radius:3px;text-align:center;outline:none}
+.rom-input:focus{border-color:#C9A84C}
+.rom-select{width:100%;background:#FAFAF8;border:1px solid #E8E4DC;color:#1C1C1E;font-family:Arial,sans-serif;font-size:12px;padding:5px 4px;border-radius:3px;outline:none}
+.rom-select:focus{border-color:#C9A84C}
 </style>
 </head>
 <body>
@@ -459,6 +477,7 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
         <div class="nav-item" onclick="showSection('readiness')">Arm Readiness Check</div>
         <div class="nav-item" onclick="showSection('tracker')">Volume Tracker</div>
         <div class="nav-item" onclick="showSection('scheduler')">Weekly Builder</div>
+        <div class="nav-item" onclick="showSection('programbuilder')">Custom Program Builder</div>
       </div>
       <div class="nav-section"><div class="nav-label">Programs</div>
         <div class="nav-item" onclick="showSection('throwingorder')">Daily Throwing Order</div>
@@ -477,6 +496,7 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
       <div class="nav-section"><div class="nav-label">Clinical (Staff Only)</div>
         <div class="nav-item" onclick="showSection('throwbuilder')">Throwing Program Builder</div>
         <div class="nav-item" onclick="showSection('runjump')">Run/Jump Progression Builder</div>
+        <div class="nav-item" onclick="showSection('armscreen')">Arm Care Screen</div>
       </div>
       <div class="nav-section"><div class="nav-label">Reference</div>
         <div class="nav-item" onclick="showSection('install')">Install the App</div>
@@ -1603,7 +1623,163 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
       </div>
 
       
-      <div class="section" id="sec-progbuilder">
+      
+      <div class="section" id="sec-armscreen">
+        <div class="sec-eyebrow">Clinical Tool - Staff Only</div>
+        <h1 class="sec-title">Arm Care Screen</h1>
+        <div class="sec-sub">Complete the form and generate a PDF for the athlete chart</div>
+        <div class="gold-bar"></div>
+        <div id="armscreen-gate">
+          <div class="callout callout-navy">
+            <div class="clin-gate-sub">Staff access required.</div>
+            <div style="display:flex;gap:10px;margin-top:12px;align-items:center">
+              <input type="password" id="armscreen-code" placeholder="Staff code" class="form-input" style="max-width:180px;letter-spacing:3px;">
+              <button class="btn-primary" onclick="unlockArmScreen()">Unlock</button>
+            </div>
+            <div id="armscreen-err" style="color:#F08070;font-size:12px;margin-top:8px;min-height:16px"></div>
+          </div>
+        </div>
+        <div id="armscreen-form" style="display:none">
+          <div class="tool-form">
+            <div class="h2" style="margin-top:0">Athlete Information</div>
+            <div class="form-row-2">
+              <div><label class="form-label">Athlete Name</label><input type="text" class="form-input" id="as-name" placeholder="First Last"></div>
+              <div><label class="form-label">Date</label><input type="date" class="form-input" id="as-date"></div>
+            </div>
+            <div class="form-row-2">
+              <div><label class="form-label">Position</label>
+                <select class="form-select" id="as-pos"><option>Starting Pitcher</option><option>Relief Pitcher</option><option>Catcher</option><option>Infield</option><option>Outfield</option></select>
+              </div>
+              <div><label class="form-label">Dominant Arm</label>
+                <select class="form-select" id="as-dom"><option>Right</option><option>Left</option></select>
+              </div>
+            </div>
+            <div class="form-row-2">
+              <div><label class="form-label">Age</label><input type="number" class="form-input" id="as-age" placeholder="e.g. 16"></div>
+              <div><label class="form-label">Current Symptoms (Y/N)</label>
+                <select class="form-select" id="as-sx"><option>No</option><option>Yes</option></select>
+              </div>
+            </div>
+            <div class="form-row-2">
+              <div><label class="form-label">Years Pitching</label><input type="text" class="form-input" id="as-yrs" placeholder="e.g. 4"></div>
+              <div><label class="form-label">Velocity (approx)</label><input type="text" class="form-input" id="as-vel" placeholder="e.g. 82 mph"></div>
+            </div>
+            <div class="form-row-2">
+              <div><label class="form-label">Innings / Week</label><input type="text" class="form-input" id="as-inn"></div>
+              <div><label class="form-label">Offseason Shutdown</label>
+                <select class="form-select" id="as-shut"><option>Yes</option><option>No</option></select>
+              </div>
+            </div>
+            <div class="form-row"><label class="form-label">Chief Complaint / Current Injury Status</label>
+              <textarea class="form-textarea" id="as-complaint" placeholder="Describe current symptoms, location, onset, behavior with throwing..."></textarea>
+            </div>
+            <div class="form-row"><label class="form-label">Prior Injury History</label>
+              <textarea class="form-textarea" id="as-hx" placeholder="Prior injuries, surgeries, procedures with side and year..."></textarea>
+            </div>
+          </div>
+          <div class="tool-form">
+            <div class="h2" style="margin-top:0">Shoulder — ROM and Strength</div>
+            <div style="overflow-x:auto">
+            <table class="tbl" style="min-width:500px"><thead><tr><th>Motion</th><th>Throw</th><th>Non-Throw</th><th>Str Throw</th><th>Str N-T</th></tr></thead><tbody>
+              <tr><td><strong>External Rotation</strong></td><td><input type="text" class="rom-input" id="sh-er-t"></td><td><input type="text" class="rom-input" id="sh-er-nt"></td><td><select class="rom-select" id="sh-er-st"><option></option><option>5/5</option><option>4+/5</option><option>4/5</option><option>3+/5</option><option>3/5</option></select></td><td><select class="rom-select" id="sh-er-snt"><option></option><option>5/5</option><option>4+/5</option><option>4/5</option><option>3+/5</option><option>3/5</option></select></td></tr>
+              <tr><td><strong>Internal Rotation</strong></td><td><input type="text" class="rom-input" id="sh-ir-t"></td><td><input type="text" class="rom-input" id="sh-ir-nt"></td><td><select class="rom-select" id="sh-ir-st"><option></option><option>5/5</option><option>4+/5</option><option>4/5</option><option>3+/5</option><option>3/5</option></select></td><td><select class="rom-select" id="sh-ir-snt"><option></option><option>5/5</option><option>4+/5</option><option>4/5</option><option>3+/5</option><option>3/5</option></select></td></tr>
+              <tr style="background:#FDFBF4"><td><strong>Total Arc (ER+IR)</strong></td><td><input type="text" class="rom-input" id="sh-arc-t" placeholder="auto"></td><td><input type="text" class="rom-input" id="sh-arc-nt" placeholder="auto"></td><td><strong style="font-size:12px;color:#0F1E35">Diff:</strong></td><td><input type="text" class="rom-input" id="sh-arc-diff" placeholder="auto"></td></tr>
+              <tr><td><strong>Flexion</strong></td><td><input type="text" class="rom-input" id="sh-fl-t"></td><td><input type="text" class="rom-input" id="sh-fl-nt"></td><td><select class="rom-select" id="sh-fl-st"><option></option><option>5/5</option><option>4+/5</option><option>4/5</option><option>3+/5</option><option>3/5</option></select></td><td><select class="rom-select" id="sh-fl-snt"><option></option><option>5/5</option><option>4+/5</option><option>4/5</option><option>3+/5</option><option>3/5</option></select></td></tr>
+              <tr><td><strong>Abduction</strong></td><td><input type="text" class="rom-input" id="sh-ab-t"></td><td><input type="text" class="rom-input" id="sh-ab-nt"></td><td><select class="rom-select" id="sh-ab-st"><option></option><option>5/5</option><option>4+/5</option><option>4/5</option><option>3+/5</option><option>3/5</option></select></td><td><select class="rom-select" id="sh-ab-snt"><option></option><option>5/5</option><option>4+/5</option><option>4/5</option><option>3+/5</option><option>3/5</option></select></td></tr>
+              <tr><td><strong>Horizontal ADD</strong></td><td><input type="text" class="rom-input" id="sh-ha-t"></td><td><input type="text" class="rom-input" id="sh-ha-nt"></td><td><select class="rom-select" id="sh-ha-st"><option></option><option>5/5</option><option>4+/5</option><option>4/5</option><option>3+/5</option><option>3/5</option></select></td><td><select class="rom-select" id="sh-ha-snt"><option></option><option>5/5</option><option>4+/5</option><option>4/5</option><option>3+/5</option><option>3/5</option></select></td></tr>
+            </tbody></table></div>
+          </div>
+          <div class="tool-form">
+            <div class="h2" style="margin-top:0">Elbow — ROM</div>
+            <div style="overflow-x:auto">
+            <table class="tbl" style="min-width:500px"><thead><tr><th>Motion</th><th>Throw</th><th>Non-Throw</th><th>Str Throw</th><th>Str N-T</th></tr></thead><tbody>
+              <tr><td><strong>Flexion</strong></td><td><input type="text" class="rom-input" id="el-fl-t"></td><td><input type="text" class="rom-input" id="el-fl-nt"></td><td><select class="rom-select" id="el-fl-st"><option></option><option>5/5</option><option>4+/5</option><option>4/5</option><option>3+/5</option><option>3/5</option></select></td><td><select class="rom-select" id="el-fl-snt"><option></option><option>5/5</option><option>4+/5</option><option>4/5</option><option>3+/5</option><option>3/5</option></select></td></tr>
+              <tr><td><strong>Extension (deficit?)</strong></td><td><input type="text" class="rom-input" id="el-ex-t"></td><td><input type="text" class="rom-input" id="el-ex-nt"></td><td><select class="rom-select" id="el-ex-st"><option></option><option>5/5</option><option>4+/5</option><option>4/5</option><option>3+/5</option><option>3/5</option></select></td><td><select class="rom-select" id="el-ex-snt"><option></option><option>5/5</option><option>4+/5</option><option>4/5</option><option>3+/5</option><option>3/5</option></select></td></tr>
+            </tbody></table></div>
+          </div>
+          <div class="tool-form">
+            <div class="h2" style="margin-top:0">Hip — ROM</div>
+            <div style="overflow-x:auto">
+            <table class="tbl" style="min-width:500px"><thead><tr><th>Motion</th><th>Right</th><th>Left</th><th>Str R</th><th>Str L</th></tr></thead><tbody>
+              <tr><td><strong>Internal Rotation</strong></td><td><input type="text" class="rom-input" id="hip-ir-r"></td><td><input type="text" class="rom-input" id="hip-ir-l"></td><td><select class="rom-select" id="hip-ir-sr"><option></option><option>5/5</option><option>4+/5</option><option>4/5</option><option>3+/5</option><option>3/5</option></select></td><td><select class="rom-select" id="hip-ir-sl"><option></option><option>5/5</option><option>4+/5</option><option>4/5</option><option>3+/5</option><option>3/5</option></select></td></tr>
+              <tr><td><strong>External Rotation</strong></td><td><input type="text" class="rom-input" id="hip-er-r"></td><td><input type="text" class="rom-input" id="hip-er-l"></td><td><select class="rom-select" id="hip-er-sr"><option></option><option>5/5</option><option>4+/5</option><option>4/5</option><option>3+/5</option><option>3/5</option></select></td><td><select class="rom-select" id="hip-er-sl"><option></option><option>5/5</option><option>4+/5</option><option>4/5</option><option>3+/5</option><option>3/5</option></select></td></tr>
+              <tr><td><strong>Extension (Thomas)</strong></td><td><input type="text" class="rom-input" id="hip-ex-r"></td><td><input type="text" class="rom-input" id="hip-ex-l"></td><td><select class="rom-select" id="hip-ex-sr"><option></option><option>5/5</option><option>4+/5</option><option>4/5</option><option>3+/5</option><option>3/5</option></select></td><td><select class="rom-select" id="hip-ex-sl"><option></option><option>5/5</option><option>4+/5</option><option>4/5</option><option>3+/5</option><option>3/5</option></select></td></tr>
+            </tbody></table></div>
+          </div>
+          <div class="tool-form">
+            <div class="h2" style="margin-top:0">Special Tests</div>
+            <div style="overflow-x:auto">
+            <table class="tbl" style="min-width:500px"><thead><tr><th>Test</th><th>Right</th><th>Left</th><th>Finding</th></tr></thead><tbody>
+              <tr><td><strong>Valgus Stress (UCL)</strong></td><td><select class="rom-select" id="st-vr"><option></option><option>Negative</option><option>Positive</option></select></td><td><select class="rom-select" id="st-vl"><option></option><option>Negative</option><option>Positive</option></select></td><td><input type="text" class="form-input" id="st-vf" style="font-size:13px;padding:6px"></td></tr>
+              <tr><td><strong>OBriens (SLAP)</strong></td><td><select class="rom-select" id="st-or"><option></option><option>Negative</option><option>Positive</option></select></td><td><select class="rom-select" id="st-ol"><option></option><option>Negative</option><option>Positive</option></select></td><td><input type="text" class="form-input" id="st-of" style="font-size:13px;padding:6px"></td></tr>
+              <tr><td><strong>Appley Scratch IR</strong></td><td><select class="rom-select" id="st-ar"><option></option><option>Normal</option><option>Limited</option></select></td><td><select class="rom-select" id="st-al"><option></option><option>Normal</option><option>Limited</option></select></td><td><input type="text" class="form-input" id="st-af" style="font-size:13px;padding:6px"></td></tr>
+              <tr><td><strong>ULTT (1 / 2a / 3)</strong></td><td><select class="rom-select" id="st-ur"><option></option><option>Negative</option><option>Positive</option></select></td><td><select class="rom-select" id="st-ul"><option></option><option>Negative</option><option>Positive</option></select></td><td><input type="text" class="form-input" id="st-uf" style="font-size:13px;padding:6px"></td></tr>
+            </tbody></table></div>
+          </div>
+          <div class="tool-form">
+            <div class="h2" style="margin-top:0">Scapula and Posture</div>
+            <div style="overflow-x:auto">
+            <table class="tbl" style="min-width:500px"><thead><tr><th>Finding</th><th>Right</th><th>Left</th><th>Grade / Notes</th></tr></thead><tbody>
+              <tr><td><strong>Inferior Position</strong></td><td><select class="rom-select" id="sc-ip-r"><option></option><option>Normal</option><option>Subtle</option><option>Abnormal</option></select></td><td><select class="rom-select" id="sc-ip-l"><option></option><option>Normal</option><option>Subtle</option><option>Abnormal</option></select></td><td><input type="text" class="form-input" id="sc-ip-n" style="font-size:13px;padding:6px"></td></tr>
+              <tr><td><strong>Lateral Displacement / Winging</strong></td><td><select class="rom-select" id="sc-ld-r"><option></option><option>Normal</option><option>Subtle</option><option>Abnormal</option></select></td><td><select class="rom-select" id="sc-ld-l"><option></option><option>Normal</option><option>Subtle</option><option>Abnormal</option></select></td><td><input type="text" class="form-input" id="sc-ld-n" style="font-size:13px;padding:6px"></td></tr>
+              <tr><td><strong>Dyskinesis</strong></td><td><select class="rom-select" id="sc-dk-r"><option></option><option>Absent</option><option>Subtle</option><option>Obvious</option></select></td><td><select class="rom-select" id="sc-dk-l"><option></option><option>Absent</option><option>Subtle</option><option>Obvious</option></select></td><td><input type="text" class="form-input" id="sc-dk-n" style="font-size:13px;padding:6px"></td></tr>
+            </tbody></table></div>
+            <div style="margin-top:14px;overflow-x:auto">
+            <table class="tbl"><thead><tr><th>Postural Finding</th><th>Normal</th><th>Subtle</th><th>Abnormal</th></tr></thead><tbody>
+              <tr><td><strong>Scapular Winging</strong></td><td><input type="radio" name="post-sw" value="Normal"></td><td><input type="radio" name="post-sw" value="Subtle"></td><td><input type="radio" name="post-sw" value="Abnormal"></td></tr>
+              <tr><td><strong>Anterior Shoulders</strong></td><td><input type="radio" name="post-as" value="Normal"></td><td><input type="radio" name="post-as" value="Subtle"></td><td><input type="radio" name="post-as" value="Abnormal"></td></tr>
+              <tr><td><strong>Kyphotic Posture</strong></td><td><input type="radio" name="post-kp" value="Normal"></td><td><input type="radio" name="post-kp" value="Subtle"></td><td><input type="radio" name="post-kp" value="Abnormal"></td></tr>
+              <tr><td><strong>Forward Head Posture</strong></td><td><input type="radio" name="post-fh" value="Normal"></td><td><input type="radio" name="post-fh" value="Subtle"></td><td><input type="radio" name="post-fh" value="Abnormal"></td></tr>
+            </tbody></table></div>
+          </div>
+          <div class="tool-form">
+            <div class="h2" style="margin-top:0">Movement Screens</div>
+            <div style="overflow-x:auto">
+            <table class="tbl" style="min-width:500px"><thead><tr><th>Screen</th><th>Right</th><th>Left</th><th>Result / Notes</th></tr></thead><tbody>
+              <tr><td><strong>Quad T-Spine Rotation</strong></td><td><input type="text" class="rom-input" id="ms-qr-r" placeholder="degrees"></td><td><input type="text" class="rom-input" id="ms-qr-l" placeholder="degrees"></td><td><input type="text" class="form-input" id="ms-qr-n" style="font-size:13px;padding:6px"></td></tr>
+              <tr><td><strong>Knee to Wall</strong></td><td><input type="text" class="rom-input" id="ms-kw-r" placeholder="cm"></td><td><input type="text" class="rom-input" id="ms-kw-l" placeholder="cm"></td><td><input type="text" class="form-input" id="ms-kw-n" style="font-size:13px;padding:6px"></td></tr>
+              <tr><td><strong>Wall Mobility — Start</strong></td><td><select class="rom-select" id="ms-ws-r"><option></option><option>Y</option><option>N</option></select></td><td><select class="rom-select" id="ms-ws-l"><option></option><option>Y</option><option>N</option></select></td><td><input type="text" class="form-input" id="ms-ws-n" style="font-size:13px;padding:6px"></td></tr>
+              <tr><td><strong>Wall Mobility — Maintain</strong></td><td><select class="rom-select" id="ms-wm-r"><option></option><option>Y</option><option>N</option></select></td><td><select class="rom-select" id="ms-wm-l"><option></option><option>Y</option><option>N</option></select></td><td><input type="text" class="form-input" id="ms-wm-n" style="font-size:13px;padding:6px"></td></tr>
+            </tbody></table></div>
+          </div>
+          <div class="tool-form">
+            <div class="h2" style="margin-top:0">Clinical Flags</div>
+            <div class="callout callout-warn" style="margin-bottom:14px"><span class="ct">Check all that apply</span></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;background:#fff;border:1px solid #E8E4DC;border-radius:4px;padding:10px;cursor:pointer"><input type="checkbox" id="flag-gird" style="margin-top:2px;accent-color:#C9A84C"> GIRD greater than 20 degrees</label>
+              <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;background:#fff;border:1px solid #E8E4DC;border-radius:4px;padding:10px;cursor:pointer"><input type="checkbox" id="flag-arc" style="margin-top:2px;accent-color:#C9A84C"> Total arc deficit greater than 5 degrees</label>
+              <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;background:#fff;border:1px solid #E8E4DC;border-radius:4px;padding:10px;cursor:pointer"><input type="checkbox" id="flag-ext" style="margin-top:2px;accent-color:#C9A84C"> Elbow extension deficit greater than 5 degrees</label>
+              <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;background:#fff;border:1px solid #E8E4DC;border-radius:4px;padding:10px;cursor:pointer"><input type="checkbox" id="flag-valgus" style="margin-top:2px;accent-color:#C9A84C"> Valgus stress test positive</label>
+              <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;background:#fff;border:1px solid #E8E4DC;border-radius:4px;padding:10px;cursor:pointer"><input type="checkbox" id="flag-scap" style="margin-top:2px;accent-color:#C9A84C"> Scapular dyskinesis present</label>
+              <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;background:#fff;border:1px solid #E8E4DC;border-radius:4px;padding:10px;cursor:pointer"><input type="checkbox" id="flag-post" style="margin-top:2px;accent-color:#C9A84C"> Forward head or kyphotic posture</label>
+              <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;background:#fff;border:1px solid #E8E4DC;border-radius:4px;padding:10px;cursor:pointer"><input type="checkbox" id="flag-sx" style="margin-top:2px;accent-color:#C9A84C"> Current arm symptoms present</label>
+              <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;background:#fff;border:1px solid #E8E4DC;border-radius:4px;padding:10px;cursor:pointer"><input type="checkbox" id="flag-ucl" style="margin-top:2px;accent-color:#C9A84C"> Prior UCL or shoulder surgery history</label>
+            </div>
+          </div>
+          <div class="tool-form">
+            <div class="h2" style="margin-top:0">Findings and Plan</div>
+            <div class="form-row"><label class="form-label">Findings / Clinical Impression</label>
+              <textarea class="form-textarea" id="as-findings" rows="4" placeholder="Summarize key findings and clinical impression..."></textarea>
+            </div>
+            <div class="form-row"><label class="form-label">Plan / Recommendations</label>
+              <textarea class="form-textarea" id="as-plan" rows="4" placeholder="Program assigned, referral, follow-up schedule, restrictions..."></textarea>
+            </div>
+            <div class="form-row-2">
+              <div><label class="form-label">Provider Name</label><input type="text" class="form-input" id="as-provider" placeholder="Name and credential"></div>
+              <div><label class="form-label">Refer for Further Evaluation</label>
+                <select class="form-select" id="as-refer"><option>No</option><option>Yes - Orthopedics</option><option>Yes - Sports Medicine MD</option><option>Yes - PT</option><option>Yes - Other</option></select>
+              </div>
+            </div>
+          </div>
+          <div style="padding:0 0 32px;display:flex;flex-direction:column;gap:10px">
+            <button class="btn-primary" onclick="generateArmScreenPDF()" style="width:100%;padding:16px;font-size:14px">Generate PDF Document</button>
+            <button class="btn-secondary" onclick="showSection('home')" style="width:100%">Back to Home</button>
+            <p style="font-size:12px;color:#7A7A85;margin-top:4px;text-align:center">Tap Print / Save PDF in the preview to save to the athlete chart</p>
+          </div>
+        </div>
+      </div>
+
+<div class="section" id="sec-programbuilder">
         <div class="sec-eyebrow">Clinical Tool - Staff Only</div>
         <h1 class="sec-title">Program Builder</h1>
         <div class="sec-sub">Select exercises, adjust sets and reps, drag to reorder, generate PDF</div>
@@ -1699,7 +1875,7 @@ document.getElementById('codeInput').onkeydown = function(e) { if (e.key === 'En
 document.querySelector('.gate-btn').addEventListener('click', function(e) { e.preventDefault(); checkCode(); });
 document.querySelector('.gate-btn').addEventListener('touchend', function(e) { e.preventDefault(); checkCode(); });
 
-var titles = {home:'Home',why:'Why Arm Care Matters',standards:'AAM Standards',redflags:'Red Flags',tspine:'T-Spine Mobility',foamroll:'Foam Roll',stretching:'Static Stretching',dynamic:'Dynamic Warm-Up',prebands:'Pre-Throw Bands',postbands:'Post-Throw Bands',scapular:'Scapular Control',twoout:'2-Out Drill',gethot:'Get Hot Routine',gameday:'Game Day Routines',longtoss:'Long Toss',mound:'Mound Progression',pitchcount:'Pitch Count Rules',recovery:'Recovery',youth:'Youth Arm Care',annual:'Annual Planning',throwingorder:'Daily Throwing Order',principles:'Arm Care Principles',readiness:'Arm Readiness Check',tracker:'Volume Tracker',scheduler:'Weekly Builder',install:'Install the App',faq:'FAQ',legal:'Legal and Disclaimer',contact:'Contact',throwbuilder:'Throwing Program Builder',runjump:'Run/Jump Progression Builder'};
+var titles = {home:'Home',why:'Why Arm Care Matters',standards:'AAM Standards',redflags:'Red Flags',tspine:'T-Spine Mobility',foamroll:'Foam Roll',stretching:'Static Stretching',dynamic:'Dynamic Warm-Up',prebands:'Pre-Throw Bands',postbands:'Post-Throw Bands',scapular:'Scapular Control',twoout:'2-Out Drill',gethot:'Get Hot Routine',gameday:'Game Day Routines',longtoss:'Long Toss',mound:'Mound Progression',pitchcount:'Pitch Count Rules',recovery:'Recovery',youth:'Youth Arm Care',annual:'Annual Planning',throwingorder:'Daily Throwing Order',principles:'Arm Care Principles',readiness:'Arm Readiness Check',tracker:'Volume Tracker',scheduler:'Weekly Builder',install:'Install the App',faq:'FAQ',legal:'Legal and Disclaimer',contact:'Contact',throwbuilder:'Throwing Program Builder',runjump:'Run/Jump Progression Builder',programbuilder:'Custom Program Builder',armscreen:'Arm Care Screen'};
 
 function showSection(id) {
   document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
@@ -2942,6 +3118,29 @@ var EX_LIB=[
 {id:68,cat:'In-Game',name:'Bent Over Trunk Rotation',ds:'1',dr:'5 ea',instr:'Rotate chest side to side, stay hinged'}
 ];
 
+// Shrinks a base64/data-URL image to a small JPEG before it goes into a printed PDF,
+// since the source library photos are full-resolution phone photos and bloat print output otherwise.
+function shrinkImgForPrint(src, maxW, maxH, quality) {
+  return new Promise(function(resolve) {
+    if (!src) { resolve(''); return; }
+    var img = new Image();
+    img.onload = function() {
+      var w = img.naturalWidth || maxW, h = img.naturalHeight || maxH;
+      var scale = Math.min(maxW / w, maxH / h, 1);
+      var cw = Math.max(1, Math.round(w * scale));
+      var ch = Math.max(1, Math.round(h * scale));
+      var canvas = document.createElement('canvas');
+      canvas.width = cw; canvas.height = ch;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, cw, ch);
+      try { resolve(canvas.toDataURL('image/jpeg', quality || 0.55)); }
+      catch (e) { resolve(src); }
+    };
+    img.onerror = function() { resolve(src); };
+    img.src = src;
+  });
+}
+
 function getExPhoto(name) {
   var cards = document.querySelectorAll('.ex-card');
   for (var i=0;i<cards.length;i++){
@@ -3056,8 +3255,13 @@ function updateProgField(el){
   if(item)item[field]=el.value;
 }
 
-function generateProgPDF(){
+async function generateProgPDF(){
   if(!pbProgram.length){alert('Add at least one exercise.');return;}
+  var btn = event && event.target;
+  if (btn) { btn.disabled = true; btn.textContent = 'Preparing PDF...'; }
+  var shrunkPhotos = await Promise.all(pbProgram.map(function(item){ return shrinkImgForPrint(item.photo, 260, 300, 0.55); }));
+  pbProgram.forEach(function(item, idx){ item._printPhoto = shrunkPhotos[idx]; });
+  if (btn) { btn.disabled = false; btn.textContent = 'Generate PDF Program'; }
   var athlete=document.getElementById('pb-athlete').value||'Athlete';
   var progname=document.getElementById('pb-progname').value||'Custom Program';
   var provider=document.getElementById('pb-provider').value||'—';
@@ -3098,7 +3302,7 @@ function generateProgPDF(){
   b+='<div class="ii"><div class="il">Exercises</div><div class="iv">'+pbProgram.length+'</div></div></div>';
   if(notes)b+='<div class="nb"><div class="nl">Program Instructions</div>'+notes+'</div>';
   pbProgram.forEach(function(item,idx){
-    b+='<div class="ec"><div class="ep"><img src="'+item.photo+'" alt="'+item.name+'"></div>';
+    b+='<div class="ec"><div class="ep"><img src="'+(item._printPhoto||item.photo)+'" alt="'+item.name+'"></div>';
     b+='<div class="eb"><div class="en">Exercise '+(idx+1)+'</div><div class="ex">'+item.name+'</div>';
     b+='<div class="ed"><div class="edi">Sets: '+(item.sets||'—')+'</div><div class="edi">Reps: '+(item.reps||'—')+'</div><div class="edi">Rest: '+(item.rest||'—')+'</div></div>';
     b+='<div class="ei">'+item.instr+'</div></div></div>';
@@ -3122,6 +3326,165 @@ function showPrintModal(content, title) {
   b.innerHTML = content;
   m.classList.add('show');
   m.scrollTop = 0;
+}
+
+
+
+function unlockArmScreen(){
+  var v=document.getElementById('armscreen-code').value.trim().toUpperCase();
+  if(v===TB_CODE.toUpperCase()){
+    document.getElementById('armscreen-gate').style.display='none';
+    document.getElementById('armscreen-form').style.display='block';
+    document.getElementById('as-date').value=new Date().toISOString().split('T')[0];
+    setupArcCalc();
+  } else { document.getElementById('armscreen-err').textContent='Incorrect staff code.'; }
+}
+function setupArcCalc(){
+  function calc(){
+    var et=parseFloat(document.getElementById('sh-er-t').value)||0;
+    var it=parseFloat(document.getElementById('sh-ir-t').value)||0;
+    var en=parseFloat(document.getElementById('sh-er-nt').value)||0;
+    var inn=parseFloat(document.getElementById('sh-ir-nt').value)||0;
+    if(et&&it)document.getElementById('sh-arc-t').value=et+it;
+    if(en&&inn){document.getElementById('sh-arc-nt').value=en+inn;if(et&&it)document.getElementById('sh-arc-diff').value=(en+inn)-(et+it);}
+  }
+  ['sh-er-t','sh-ir-t','sh-er-nt','sh-ir-nt'].forEach(function(id){var el=document.getElementById(id);if(el)el.oninput=calc;});
+}
+function getRadioVal(name){
+  var radios=document.querySelectorAll('input[name="'+name+'"]');
+  for(var i=0;i<radios.length;i++){if(radios[i].checked)return radios[i].value;}
+  return '—';
+}
+function getFlags(){
+  var flags=[];
+  var fm={'flag-gird':'GIRD > 20 degrees','flag-arc':'Total arc deficit > 5 degrees','flag-ext':'Elbow extension deficit > 5 degrees','flag-valgus':'Valgus stress test positive','flag-scap':'Scapular dyskinesis present','flag-post':'Forward head / kyphotic posture','flag-sx':'Current arm symptoms present','flag-ucl':'Prior UCL / shoulder surgery history'};
+  Object.keys(fm).forEach(function(id){var el=document.getElementById(id);if(el&&el.checked)flags.push(fm[id]);});
+  return flags;
+}
+function generateArmScreenPDF(){
+  var name=document.getElementById('as-name').value||'Athlete';
+  var date=document.getElementById('as-date').value||'';
+  var pos=document.getElementById('as-pos').value;
+  var dom=document.getElementById('as-dom').value;
+  var age=document.getElementById('as-age').value||'—';
+  var sx=document.getElementById('as-sx').value;
+  var yrs=document.getElementById('as-yrs').value||'—';
+  var vel=document.getElementById('as-vel').value||'—';
+  var inn=document.getElementById('as-inn').value||'—';
+  var shut=document.getElementById('as-shut').value;
+  var complaint=document.getElementById('as-complaint').value||'—';
+  var hx=document.getElementById('as-hx').value||'None reported';
+  var findings=document.getElementById('as-findings').value||'—';
+  var plan=document.getElementById('as-plan').value||'—';
+  var provider=document.getElementById('as-provider').value||'—';
+  var refer=document.getElementById('as-refer').value;
+  var flags=getFlags();
+  function rv(id){var el=document.getElementById(id);return el?(el.value||'—'):'—';}
+  function rs(id){var el=document.getElementById(id);return el?(el.value||'—'):'—';}
+
+  var css='<style>';
+  css+='*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:11px;color:#1C1C1E;padding:16px}';
+  css+='.hdr{background:#0F1E35;color:#fff;padding:14px 18px;margin-bottom:12px;border-bottom:3px solid #C9A84C}';
+  css+='.hdr-sub{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#C9A84C;margin-bottom:4px}';
+  css+='.hdr-title{font-size:17px;font-weight:700}';
+  css+='.hdr-meta{font-size:10px;color:#7A9AB5;margin-top:2px}';
+  css+='.ig{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:10px}';
+  css+='.ii{background:#F5F4F0;padding:6px 8px;border-radius:2px}';
+  css+='.il{font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#7A7A85;margin-bottom:1px}';
+  css+='.iv{font-size:11px;font-weight:700;color:#0F1E35}';
+  css+='.nar{background:#F5F4F0;padding:7px 9px;border-radius:2px;font-size:11px;line-height:1.5;white-space:pre-wrap;min-height:28px;margin-bottom:8px}';
+  css+='.nar-lbl{font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#7A7A85;margin-bottom:3px}';
+  css+='.sec{margin-bottom:10px}';
+  css+='.sec-title{background:#1A2F4E;color:#C9A84C;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:5px 9px;margin-bottom:6px}';
+  css+='table{width:100%;border-collapse:collapse;font-size:10px;margin-bottom:6px}';
+  css+='th{background:#0F1E35;color:#fff;padding:4px 7px;text-align:left;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase}';
+  css+='td{padding:4px 7px;border-bottom:1px solid #E8E4DC;vertical-align:middle}';
+  css+='tr:nth-child(even) td{background:#FAFAF8}';
+  css+='.arc td{background:#FDFBF4;font-weight:700}';
+  css+='.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}';
+  css+='.flag-item{background:#FDF2F0;border-left:3px solid #C8402A;padding:4px 8px;margin-bottom:3px;font-size:10px}';
+  css+='.ok{color:#1A6A1A;font-size:10px;font-weight:700}';
+  css+='.ft{margin-top:12px;padding-top:8px;border-top:1px solid #E8E4DC;font-size:9px;color:#7A7A85;display:flex;justify-content:space-between}';
+  css+='@media print{.hdr,.ii,.sec-title,th{-webkit-print-color-adjust:exact;print-color-adjust:exact}}';
+  css+='</style>';
+
+  var b='<div class="hdr"><div class="hdr-sub">Advanced Athletic Medicine</div><div class="hdr-title">Arm Care Screen</div><div class="hdr-meta">Confidential — For Clinical Use Only</div></div>';
+  b+='<div class="ig">';
+  b+='<div class="ii"><div class="il">Name</div><div class="iv">'+name+'</div></div>';
+  b+='<div class="ii"><div class="il">Date</div><div class="iv">'+date+'</div></div>';
+  b+='<div class="ii"><div class="il">Position</div><div class="iv">'+pos+'</div></div>';
+  b+='<div class="ii"><div class="il">Dom Arm</div><div class="iv">'+dom+'</div></div>';
+  b+='<div class="ii"><div class="il">Age</div><div class="iv">'+age+'</div></div>';
+  b+='<div class="ii"><div class="il">Symptoms</div><div class="iv">'+sx+'</div></div>';
+  b+='<div class="ii"><div class="il">Yrs Pitching</div><div class="iv">'+yrs+'</div></div>';
+  b+='<div class="ii"><div class="il">Velocity</div><div class="iv">'+vel+'</div></div>';
+  b+='<div class="ii"><div class="il">Inn/Wk</div><div class="iv">'+inn+'</div></div>';
+  b+='<div class="ii"><div class="il">Shutdown</div><div class="iv">'+shut+'</div></div>';
+  b+='</div>';
+  b+='<div class="nar-lbl">Chief Complaint</div><div class="nar">'+complaint+'</div>';
+  b+='<div class="nar-lbl">Prior Injury History</div><div class="nar">'+hx+'</div>';
+
+  b+='<div class="two">';
+  b+='<div>';
+  b+='<div class="sec"><div class="sec-title">Shoulder ROM and Strength</div>';
+  b+='<table><thead><tr><th>Motion</th><th>Throw</th><th>N-T</th><th>Str T</th><th>Str NT</th></tr></thead><tbody>';
+  b+='<tr><td><strong>ER</strong></td><td>'+rv('sh-er-t')+'</td><td>'+rv('sh-er-nt')+'</td><td>'+rs('sh-er-st')+'</td><td>'+rs('sh-er-snt')+'</td></tr>';
+  b+='<tr><td><strong>IR</strong></td><td>'+rv('sh-ir-t')+'</td><td>'+rv('sh-ir-nt')+'</td><td>'+rs('sh-ir-st')+'</td><td>'+rs('sh-ir-snt')+'</td></tr>';
+  b+='<tr class="arc"><td><strong>Total Arc</strong></td><td>'+rv('sh-arc-t')+'</td><td>'+rv('sh-arc-nt')+'</td><td>Diff:</td><td>'+rv('sh-arc-diff')+'</td></tr>';
+  b+='<tr><td><strong>Flexion</strong></td><td>'+rv('sh-fl-t')+'</td><td>'+rv('sh-fl-nt')+'</td><td>'+rs('sh-fl-st')+'</td><td>'+rs('sh-fl-snt')+'</td></tr>';
+  b+='<tr><td><strong>Abduction</strong></td><td>'+rv('sh-ab-t')+'</td><td>'+rv('sh-ab-nt')+'</td><td>'+rs('sh-ab-st')+'</td><td>'+rs('sh-ab-snt')+'</td></tr>';
+  b+='<tr><td><strong>H-ADD</strong></td><td>'+rv('sh-ha-t')+'</td><td>'+rv('sh-ha-nt')+'</td><td>'+rs('sh-ha-st')+'</td><td>'+rs('sh-ha-snt')+'</td></tr>';
+  b+='</tbody></table></div>';
+  b+='<div class="sec"><div class="sec-title">Elbow ROM</div>';
+  b+='<table><thead><tr><th>Motion</th><th>Throw</th><th>N-T</th><th>Str T</th><th>Str NT</th></tr></thead><tbody>';
+  b+='<tr><td><strong>Flexion</strong></td><td>'+rv('el-fl-t')+'</td><td>'+rv('el-fl-nt')+'</td><td>'+rs('el-fl-st')+'</td><td>'+rs('el-fl-snt')+'</td></tr>';
+  b+='<tr><td><strong>Extension</strong></td><td>'+rv('el-ex-t')+'</td><td>'+rv('el-ex-nt')+'</td><td>'+rs('el-ex-st')+'</td><td>'+rs('el-ex-snt')+'</td></tr>';
+  b+='</tbody></table></div>';
+  b+='<div class="sec"><div class="sec-title">Hip ROM</div>';
+  b+='<table><thead><tr><th>Motion</th><th>R</th><th>L</th><th>Str R</th><th>Str L</th></tr></thead><tbody>';
+  b+='<tr><td><strong>IR</strong></td><td>'+rv('hip-ir-r')+'</td><td>'+rv('hip-ir-l')+'</td><td>'+rs('hip-ir-sr')+'</td><td>'+rs('hip-ir-sl')+'</td></tr>';
+  b+='<tr><td><strong>ER</strong></td><td>'+rv('hip-er-r')+'</td><td>'+rv('hip-er-l')+'</td><td>'+rs('hip-er-sr')+'</td><td>'+rs('hip-er-sl')+'</td></tr>';
+  b+='<tr><td><strong>Extension</strong></td><td>'+rv('hip-ex-r')+'</td><td>'+rv('hip-ex-l')+'</td><td>'+rs('hip-ex-sr')+'</td><td>'+rs('hip-ex-sl')+'</td></tr>';
+  b+='</tbody></table></div>';
+  b+='</div>';
+  b+='<div>';
+  b+='<div class="sec"><div class="sec-title">Special Tests</div>';
+  b+='<table><thead><tr><th>Test</th><th>R</th><th>L</th><th>Finding</th></tr></thead><tbody>';
+  b+='<tr><td><strong>Valgus Stress</strong></td><td>'+rs('st-vr')+'</td><td>'+rs('st-vl')+'</td><td>'+rv('st-vf')+'</td></tr>';
+  b+='<tr><td><strong>OBriens</strong></td><td>'+rs('st-or')+'</td><td>'+rs('st-ol')+'</td><td>'+rv('st-of')+'</td></tr>';
+  b+='<tr><td><strong>Appley Scratch</strong></td><td>'+rs('st-ar')+'</td><td>'+rs('st-al')+'</td><td>'+rv('st-af')+'</td></tr>';
+  b+='<tr><td><strong>ULTT</strong></td><td>'+rs('st-ur')+'</td><td>'+rs('st-ul')+'</td><td>'+rv('st-uf')+'</td></tr>';
+  b+='</tbody></table></div>';
+  b+='<div class="sec"><div class="sec-title">Scapula and Posture</div>';
+  b+='<table><thead><tr><th>Finding</th><th>R</th><th>L</th><th>Notes</th></tr></thead><tbody>';
+  b+='<tr><td><strong>Inferior Position</strong></td><td>'+rs('sc-ip-r')+'</td><td>'+rs('sc-ip-l')+'</td><td>'+rv('sc-ip-n')+'</td></tr>';
+  b+='<tr><td><strong>Winging</strong></td><td>'+rs('sc-ld-r')+'</td><td>'+rs('sc-ld-l')+'</td><td>'+rv('sc-ld-n')+'</td></tr>';
+  b+='<tr><td><strong>Dyskinesis</strong></td><td>'+rs('sc-dk-r')+'</td><td>'+rs('sc-dk-l')+'</td><td>'+rv('sc-dk-n')+'</td></tr>';
+  b+='</tbody></table>';
+  b+='<table><thead><tr><th>Posture</th><th>Grade</th></tr></thead><tbody>';
+  b+='<tr><td>Scapular Winging</td><td>'+getRadioVal('post-sw')+'</td></tr>';
+  b+='<tr><td>Anterior Shoulders</td><td>'+getRadioVal('post-as')+'</td></tr>';
+  b+='<tr><td>Kyphotic Posture</td><td>'+getRadioVal('post-kp')+'</td></tr>';
+  b+='<tr><td>Forward Head</td><td>'+getRadioVal('post-fh')+'</td></tr>';
+  b+='</tbody></table></div>';
+  b+='<div class="sec"><div class="sec-title">Movement Screens</div>';
+  b+='<table><thead><tr><th>Screen</th><th>R</th><th>L</th><th>Notes</th></tr></thead><tbody>';
+  b+='<tr><td><strong>Quad T-Spine</strong></td><td>'+rv('ms-qr-r')+'</td><td>'+rv('ms-qr-l')+'</td><td>'+rv('ms-qr-n')+'</td></tr>';
+  b+='<tr><td><strong>Knee to Wall</strong></td><td>'+rv('ms-kw-r')+'</td><td>'+rv('ms-kw-l')+'</td><td>'+rv('ms-kw-n')+'</td></tr>';
+  b+='<tr><td><strong>Wall Mob Start</strong></td><td>'+rs('ms-ws-r')+'</td><td>'+rs('ms-ws-l')+'</td><td>'+rv('ms-ws-n')+'</td></tr>';
+  b+='<tr><td><strong>Wall Mob Maintain</strong></td><td>'+rs('ms-wm-r')+'</td><td>'+rs('ms-wm-l')+'</td><td>'+rv('ms-wm-n')+'</td></tr>';
+  b+='</tbody></table></div>';
+  b+='</div></div>';
+
+  var flagsHtml=flags.length?flags.map(function(f){return '<div class="flag-item">&#9888; '+f+'</div>';}).join(''):'<div class="ok">No flags identified</div>';
+  b+='<div class="sec"><div class="sec-title">Clinical Flags</div>'+flagsHtml+'</div>';
+  b+='<div class="two">';
+  b+='<div class="sec"><div class="sec-title">Findings / Impression</div><div class="nar">'+findings+'</div></div>';
+  b+='<div class="sec"><div class="sec-title">Plan / Recommendations</div><div class="nar">'+plan+'</div></div>';
+  b+='</div>';
+  b+='<div class="ft"><div>Provider: '+provider+' &nbsp;|&nbsp; Referral: '+refer+'</div><div>Advanced Athletic Medicine &middot; Confidential &middot; 2026</div></div>';
+
+  showPrintModal(css+b, 'Arm Care Screen - '+name);
 }
 
 </script>

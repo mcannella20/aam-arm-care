@@ -5,6 +5,71 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AAM Arm Care Manual</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+/* ---- Coaches Tools (scoped, imported from standalone coaches-tools.html) ---- */
+#sec-coaches .ct-tool-grid{display:grid;grid-template-columns:1fr;gap:14px;}
+@media(min-width:600px){#sec-coaches .ct-tool-grid{grid-template-columns:1fr 1fr;}}
+#sec-coaches .ct-tool-card{background:#fff;border:1px solid #e7eaec;border-radius:10px;padding:18px;cursor:pointer;transition:box-shadow 0.15s, transform 0.15s;display:flex;flex-direction:column;gap:8px;}
+#sec-coaches .ct-tool-card:hover{box-shadow:0 4px 14px rgba(18,35,71,0.1);transform:translateY(-1px);}
+#sec-coaches .ct-tool-card.ct-disabled{cursor:default;opacity:0.55;}
+#sec-coaches .ct-tool-card.ct-disabled:hover{box-shadow:none;transform:none;}
+#sec-coaches .ct-tool-icon{width:38px;height:38px;border-radius:8px;background:#122347;color:#85bab5;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;font-family:'Barlow Condensed',sans-serif;}
+#sec-coaches .ct-tool-card h3{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:600;margin:0;text-transform:uppercase;letter-spacing:0.02em;color:#122347;}
+#sec-coaches .ct-tool-card p{margin:0;font-size:13px;color:#5a6570;line-height:1.5;}
+#sec-coaches .ct-tool-status{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;padding:3px 8px;border-radius:20px;display:inline-block;width:fit-content;}
+#sec-coaches .ct-status-live{background:#eaf2ee;color:#4c8062;}
+#sec-coaches .ct-status-soon{background:#f0f2f3;color:#8b96a0;}
+#sec-coaches .ct-section-label{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#8b96a0;margin:26px 0 10px;}
+#sec-coaches .ct-section-label:first-of-type{margin-top:4px;}
+#sec-coaches #ct-toolView{display:none;}
+#sec-coaches #ct-toolView.show{display:block;}
+#sec-coaches #ct-landingView.hide{display:none;}
+#sec-coaches .ct-crumbs{font-size:12.5px;color:#8b96a0;display:none;margin-bottom:14px;}
+#sec-coaches .ct-crumbs.show{display:block;}
+#sec-coaches .ct-crumbs a{color:#1c3466;text-decoration:none;font-weight:600;cursor:pointer;}
+#sec-coaches .ct-crumbs a:hover{text-decoration:underline;}
+#sec-coaches .ct-card{background:#fff;border-radius:10px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(18,35,71,0.08);border:1px solid #e7eaec;font-family:'Inter',sans-serif;}
+#sec-coaches .ct-card h2{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:600;margin:0 0 12px;text-transform:uppercase;letter-spacing:0.04em;color:#122347;}
+#sec-coaches .ct-global-row{display:flex;gap:12px;align-items:flex-end;margin-bottom:6px;flex-wrap:wrap;}
+#sec-coaches .ct-field{flex:1;min-width:140px;margin-bottom:10px;}
+#sec-coaches .ct-field label{display:block;font-size:12.5px;font-weight:600;margin-bottom:4px;color:#1c3466;font-family:'Inter',sans-serif;}
+#sec-coaches select, #sec-coaches input[type=number], #sec-coaches input[type=text]{width:100%;padding:9px 10px;border:1px solid #d5dade;border-radius:6px;font-size:14px;font-family:'Inter',sans-serif;background:#fff;color:#122347;}
+#sec-coaches select:focus, #sec-coaches input:focus{outline:2px solid #85bab5;outline-offset:1px;}
+#sec-coaches table{width:100%;border-collapse:collapse;font-size:13.5px;font-family:'Inter',sans-serif;}
+#sec-coaches th{text-align:left;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;font-size:11.5px;letter-spacing:0.03em;color:#6b7680;padding:6px 6px;border-bottom:2px solid #e7eaec;}
+#sec-coaches td{padding:7px 6px;border-bottom:1px solid #f0f2f3;vertical-align:middle;}
+#sec-coaches td select, #sec-coaches td input{padding:6px 7px;font-size:13px;}
+#sec-coaches tr:last-child td{border-bottom:none;}
+#sec-coaches .ct-status-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle;}
+#sec-coaches .ct-dot-green{background:#4c8062;}
+#sec-coaches .ct-dot-amber{background:#c9822a;}
+#sec-coaches .ct-dot-red{background:#a3453c;}
+#sec-coaches .ct-btn{padding:10px 16px;background:#122347;color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;}
+#sec-coaches .ct-btn:hover{background:#1c3466;}
+#sec-coaches .ct-btn-secondary{background:#eef0f1;color:#122347;}
+#sec-coaches .ct-btn-secondary:hover{background:#e2e5e7;}
+#sec-coaches .ct-board-row{display:flex;align-items:center;gap:10px;padding:10px 8px;border-radius:7px;margin-bottom:6px;background:#f9fafa;border-left:4px solid #d5dade;flex-wrap:wrap;}
+#sec-coaches .ct-board-row.ct-status-red{border-left-color:#a3453c;background:#fbf1f0;}
+#sec-coaches .ct-board-row.ct-status-amber{border-left-color:#c9822a;background:#fbf5ec;}
+#sec-coaches .ct-board-row.ct-status-green{border-left-color:#4c8062;background:#f2f7f4;}
+#sec-coaches .ct-board-name{font-weight:700;min-width:110px;font-size:14px;color:#122347;font-family:'Inter',sans-serif;}
+#sec-coaches .ct-board-detail{flex:1;font-size:12.5px;color:#4a5560;line-height:1.4;min-width:200px;}
+#sec-coaches .ct-board-suggestion{font-size:12px;font-weight:600;color:#122347;background:#fff;padding:4px 9px;border-radius:20px;border:1px solid #d5dade;white-space:nowrap;}
+#sec-coaches .ct-empty-note{font-size:13px;color:#8b96a0;padding:10px 2px;}
+#sec-coaches .ct-legend{display:flex;gap:16px;font-size:12px;color:#5a6570;margin-bottom:14px;flex-wrap:wrap;font-family:'Inter',sans-serif;}
+#sec-coaches .ct-legend span{display:flex;align-items:center;}
+#sec-coaches .ct-footnote{font-size:11.5px;color:#8b96a0;margin-top:16px;line-height:1.5;}
+#sec-coaches .ct-remove-btn{background:none;border:none;color:#b0242b;font-size:16px;cursor:pointer;padding:0 4px;width:auto;}
+#sec-coaches .ct-remove-btn:hover{background:none;color:#7a1a1f;}
+#sec-coaches .ct-add-row{margin-top:10px;}
+#sec-coaches .ct-data-disclaimer{background:#fbf3e8;border-left:4px solid #c9822a;border-radius:7px;padding:12px 14px;font-size:12.5px;color:#5a4425;line-height:1.5;margin-bottom:14px;font-family:'Inter',sans-serif;}
+#sec-coaches .ct-data-disclaimer strong{color:#122347;}
+#sec-coaches .ct-data-disclaimer a{color:#122347;font-weight:600;}
+#sec-coaches .ct-medical-disclaimer{background:#f0f2f3;border-left:4px solid #122347;border-radius:7px;padding:12px 14px;font-size:12.5px;color:#3a4552;line-height:1.5;margin-bottom:16px;font-family:'Inter',sans-serif;}
+#sec-coaches .ct-medical-disclaimer strong{color:#122347;}
+#sec-coaches .ct-landing-footer{font-size:11.5px;color:#8b96a0;line-height:1.6;margin-top:26px;border-top:1px solid #e7eaec;padding-top:14px;font-family:'Inter',sans-serif;}
+#sec-coaches .ct-landing-footer a{color:#1c3466;font-weight:600;text-decoration:none;}
+#sec-coaches .ct-landing-footer a:hover{text-decoration:underline;}
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
 #gate { position: fixed; inset: 0; background: #0F1E35; display: flex; align-items: center; justify-content: center; z-index: 999; }
@@ -491,6 +556,9 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
         <div class="nav-item" onclick="showSection('recovery')">Recovery</div>
         <div class="nav-item" onclick="showSection('youth')">Youth Arm Care</div>
         <div class="nav-item" onclick="showSection('annual')">Annual Planning</div>
+      </div>
+      <div class="nav-section"><div class="nav-label">Coaches Tools</div>
+        <div class="nav-item" onclick="showSection('coaches')">Throw Exposure Board</div>
       </div>
       <div class="nav-section"><div class="nav-label">Clinical (Staff Only)</div>
         <div class="nav-item" onclick="showSection('throwbuilder')">Throwing Program Builder</div>
@@ -1838,6 +1906,114 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
         </div>
       </div>
 
+<div class="section" id="sec-coaches">
+  <div class="sec-eyebrow">Coaches Tools</div>
+  <h1 class="sec-title" id="ct-title">Coaches Tools</h1>
+  <div class="sec-sub" id="ct-sub">Practical arm-care tools built for how youth and high school teams actually operate &mdash; small rosters, two-way players, and schedules that don't leave room for ideal rest.</div>
+  <div class="gold-bar"></div>
+
+  <nav class="ct-crumbs" id="ct-crumbs"><a onclick="ctShowLanding()">&larr; Coaches Tools</a></nav>
+
+  <div id="ct-landingView">
+    <div class="ct-section-label">Live Tools</div>
+    <div class="ct-tool-grid">
+      <div class="ct-tool-card" onclick="ctShowTool('exposure')">
+        <div class="ct-tool-icon">TE</div>
+        <h3>Throw Exposure Board</h3>
+        <p>Track mound + position throws together for two-way players and see who's carrying risk across the whole roster.</p>
+        <span class="ct-tool-status ct-status-live">Live prototype</span>
+      </div>
+    </div>
+
+    <div class="ct-section-label">Coming Soon</div>
+    <div class="ct-tool-grid">
+      <div class="ct-tool-card ct-disabled">
+        <div class="ct-tool-icon">WK</div>
+        <h3>Weekly Volume Log</h3>
+        <p>Rolling per-athlete history instead of a single game day &mdash; spot the kids stacking exposure week over week.</p>
+        <span class="ct-tool-status ct-status-soon">Planned</span>
+      </div>
+      <div class="ct-tool-card ct-disabled">
+        <div class="ct-tool-icon">TN</div>
+        <h3>Tournament Mode</h3>
+        <p>Chain multiple same-day and back-to-back games for weekend tournaments, where the math changes fast.</p>
+        <span class="ct-tool-status ct-status-soon">Planned</span>
+      </div>
+    </div>
+
+    <div class="ct-landing-footer">
+      Pitch count guidelines referenced throughout this section come from MLB/USA Baseball's Pitch Smart program &mdash; <a href="https://www.mlb.com/pitch-smart/pitching-guidelines" target="_blank" rel="noopener">mlb.com/pitch-smart/pitching-guidelines</a>. These tools are educational planning aids for coaches and staff and do not replace evaluation by a licensed athletic trainer or physician. Any athlete reporting arm pain or showing altered mechanics should be referred for clinical evaluation regardless of what a tool here shows.
+    </div>
+  </div>
+
+  <div id="ct-toolView">
+
+    <div class="ct-data-disclaimer">
+      <strong>About these numbers:</strong> pitch-count rest tiers are the official MLB/USA Baseball Pitch Smart table, pulled directly from the source below. Field-throw-per-inning estimates (low/mid/high) are still placeholder figures for demonstration only &mdash; no published source quantifies throw volume by position. The exposure math built on top of the official tiers is a working model of the logic, not a validated clinical tool, until the field-throw side is replaced with real observed data. Also note: Pitch Smart separately requires no pitcher appear in a game 3 consecutive days regardless of pitch count &mdash; not yet reflected in this tool.
+      <br><br>
+      <strong>Source:</strong> <a href="https://www.mlb.com/pitch-smart/pitching-guidelines" target="_blank" rel="noopener">mlb.com/pitch-smart/pitching-guidelines</a> &mdash; verify current tiers there, as guidelines are periodically updated.
+    </div>
+
+    <div class="ct-medical-disclaimer">
+      <strong>Not medical advice.</strong> This tool is an educational planning aid for coaches and does not replace evaluation by a licensed athletic trainer, physician, or other qualified medical provider. Any athlete with arm pain, altered mechanics, or reported soreness should be pulled from throwing and referred for a clinical evaluation regardless of what this tool shows.
+    </div>
+
+    <div class="ct-card">
+      <h2>Team Settings</h2>
+      <div class="ct-global-row">
+        <div class="ct-field">
+          <label for="ct-ageGroup">Age Group</label>
+          <select id="ct-ageGroup" onchange="ctRenderBoard()">
+            <option value="8">7&ndash;8</option>
+            <option value="10">9&ndash;10</option>
+            <option value="12">11&ndash;12</option>
+            <option value="14" selected>13&ndash;14</option>
+            <option value="16">15&ndash;16</option>
+            <option value="18">17&ndash;18</option>
+            <option value="22">19&ndash;22</option>
+          </select>
+        </div>
+        <div class="ct-field">
+          <label for="ct-daysToNext">Days Until Next Game</label>
+          <input type="number" id="ct-daysToNext" min="0" value="2" onchange="ctRenderBoard()">
+        </div>
+      </div>
+    </div>
+
+    <div class="ct-card">
+      <h2>Today's Log</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:22%">Player</th>
+            <th style="width:16%">Pitches</th>
+            <th style="width:30%">Position After</th>
+            <th style="width:14%">Innings</th>
+            <th style="width:10%"></th>
+          </tr>
+        </thead>
+        <tbody id="ct-rosterBody"></tbody>
+      </table>
+      <button class="ct-btn ct-btn-secondary ct-add-row" onclick="ctAddPlayer()">+ Add Player</button>
+    </div>
+
+    <div class="ct-card">
+      <h2>Status Board &mdash; Ranked by Risk</h2>
+      <div class="ct-legend">
+        <span><span class="ct-status-dot ct-dot-red"></span>Red &mdash; pushing it into the next game</span>
+        <span><span class="ct-status-dot ct-dot-amber"></span>Amber &mdash; worth a lighter spot</span>
+        <span><span class="ct-status-dot ct-dot-green"></span>Green &mdash; clear</span>
+      </div>
+      <div id="ct-board"></div>
+    </div>
+
+    <div class="ct-footnote">
+      Nothing on this page persists after you close it &mdash; this is a working prototype, not a saved record system yet. Built for AAM.
+    </div>
+
+  </div>
+</div>
+
 <div class="section" id="sec-contact">
         <div class="sec-eyebrow">Reference</div>
         <h1 class="sec-title">Contact and Social</h1>
@@ -1875,7 +2051,7 @@ document.getElementById('codeInput').onkeydown = function(e) { if (e.key === 'En
 document.querySelector('.gate-btn').addEventListener('click', function(e) { e.preventDefault(); checkCode(); });
 document.querySelector('.gate-btn').addEventListener('touchend', function(e) { e.preventDefault(); checkCode(); });
 
-var titles = {home:'Home',why:'Why Arm Care Matters',standards:'AAM Standards',redflags:'Red Flags',tspine:'T-Spine Mobility',foamroll:'Foam Roll',stretching:'Static Stretching',dynamic:'Dynamic Warm-Up',prebands:'Pre-Throw Bands',postbands:'Post-Throw Bands',scapular:'Scapular Control',twoout:'2-Out Drill',gethot:'Get Hot Routine',gameday:'Game Day Routines',longtoss:'Long Toss',mound:'Mound Progression',pitchcount:'Pitch Count Rules',recovery:'Recovery',youth:'Youth Arm Care',annual:'Annual Planning',throwingorder:'Daily Throwing Order',principles:'Arm Care Principles',readiness:'Arm Readiness Check',tracker:'Volume Tracker',scheduler:'Weekly Builder',install:'Install the App',faq:'FAQ',legal:'Legal and Disclaimer',contact:'Contact',throwbuilder:'Throwing Program Builder',runjump:'Run/Jump Progression Builder',programbuilder:'Custom Program Builder',armscreen:'Arm Care Screen'};
+var titles = {home:'Home',why:'Why Arm Care Matters',standards:'AAM Standards',redflags:'Red Flags',tspine:'T-Spine Mobility',foamroll:'Foam Roll',stretching:'Static Stretching',dynamic:'Dynamic Warm-Up',prebands:'Pre-Throw Bands',postbands:'Post-Throw Bands',scapular:'Scapular Control',twoout:'2-Out Drill',gethot:'Get Hot Routine',gameday:'Game Day Routines',longtoss:'Long Toss',mound:'Mound Progression',pitchcount:'Pitch Count Rules',recovery:'Recovery',youth:'Youth Arm Care',annual:'Annual Planning',throwingorder:'Daily Throwing Order',principles:'Arm Care Principles',readiness:'Arm Readiness Check',tracker:'Volume Tracker',scheduler:'Weekly Builder',install:'Install the App',faq:'FAQ',legal:'Legal and Disclaimer',contact:'Contact',throwbuilder:'Throwing Program Builder',runjump:'Run/Jump Progression Builder',programbuilder:'Custom Program Builder',armscreen:'Arm Care Screen',coaches:'Coaches Tools'};
 
 function showSection(id) {
   document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
@@ -3485,6 +3661,149 @@ function generateArmScreenPDF(){
   b+='<div class="ft"><div>Provider: '+provider+' &nbsp;|&nbsp; Referral: '+refer+'</div><div>Advanced Athletic Medicine &middot; Confidential &middot; 2026</div></div>';
 
   showPrintModal(css+b, 'Arm Care Screen - '+name);
+}
+
+// ============================================================
+// COACHES TOOLS - THROW EXPOSURE BOARD
+// ============================================================
+function ctShowTool(name){
+  document.getElementById('ct-landingView').classList.add('hide');
+  document.getElementById('ct-toolView').classList.add('show');
+  document.getElementById('ct-crumbs').classList.add('show');
+  document.getElementById('ct-title').textContent = 'Throw Exposure Board';
+  document.getElementById('ct-sub').textContent = "Mound + position throws in one view, with an honest risk flag instead of a rest order the roster can't afford.";
+  ctRenderRoster();
+}
+function ctShowLanding(){
+  document.getElementById('ct-landingView').classList.remove('hide');
+  document.getElementById('ct-toolView').classList.remove('show');
+  document.getElementById('ct-crumbs').classList.remove('show');
+  document.getElementById('ct-title').textContent = 'Coaches Tools';
+  document.getElementById('ct-sub').textContent = "Practical arm-care tools built for how youth and high school teams actually operate \u2014 small rosters, two-way players, and schedules that don't leave room for ideal rest.";
+}
+
+var ctFieldThrowRates = { none: 0, low: 4, mid: 9, high: 15 };
+var ctPositionLabels = { none: 'None', low: 'OF / 1B (low)', mid: '2B / SS / 3B (mid)', high: 'Catcher (high)' };
+
+// Official MLB/USA Baseball Pitch Smart table (mlb.com/pitch-smart/pitching-guidelines)
+var ctDailyMax = { 8: 50, 10: 75, 12: 85, 14: 95, 16: 95, 18: 105, 22: 120 };
+var ctPitchSmartTiers = {
+  8:  [ [0,20,0],[21,35,1],[36,50,2] ],
+  10: [ [0,20,0],[21,35,1],[36,50,2],[51,65,3],[66,75,4] ],
+  12: [ [0,20,0],[21,35,1],[36,50,2],[51,65,3],[66,85,4] ],
+  14: [ [0,20,0],[21,35,1],[36,50,2],[51,65,3],[66,95,4] ],
+  16: [ [0,30,0],[31,45,1],[46,60,2],[61,75,3],[76,95,4] ],
+  18: [ [0,30,0],[31,45,1],[46,60,2],[61,80,3],[81,105,4] ],
+  22: [ [0,30,0],[31,45,1],[46,60,2],[61,80,3],[81,105,4] ]
+};
+
+function ctGetTier(throwCount, age){
+  var tiers = ctPitchSmartTiers[age];
+  for (var i = 0; i < tiers.length; i++) {
+    var min = tiers[i][0], max = tiers[i][1], rest = tiers[i][2];
+    if (throwCount >= min && throwCount <= max) return rest;
+  }
+  return tiers[tiers.length-1][2];
+}
+
+var ctPlayers = [
+  { name: 'Cole B.',    pitches: 78, position: 'mid',  innings: 4 },
+  { name: 'Dylan R.',   pitches: 0,  position: 'high', innings: 6 },
+  { name: 'Tanner M.',  pitches: 42, position: 'low',  innings: 3 },
+  { name: 'Jaxon P.',   pitches: 0,  position: 'mid',  innings: 6 }
+];
+
+function ctAddPlayer(){
+  ctPlayers.push({ name: '', pitches: 0, position: 'none', innings: 0 });
+  ctRenderRoster();
+}
+function ctRemovePlayer(i){
+  ctPlayers.splice(i,1);
+  ctRenderRoster();
+}
+function ctUpdatePlayer(i, field, value){
+  ctPlayers[i][field] = field === 'name' ? value : (field === 'position' ? value : parseInt(value)||0);
+  ctRenderBoard();
+}
+
+function ctRenderRoster(){
+  var body = document.getElementById('ct-rosterBody');
+  body.innerHTML = '';
+  ctPlayers.forEach(function(p, i) {
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td><input type="text" value="' + p.name + '" placeholder="Name" onchange="ctUpdatePlayer(' + i + ',\'name\',this.value)"></td>' +
+      '<td><input type="number" min="0" value="' + p.pitches + '" onchange="ctUpdatePlayer(' + i + ',\'pitches\',this.value)"></td>' +
+      '<td><select onchange="ctUpdatePlayer(' + i + ',\'position\',this.value)">' +
+        Object.keys(ctPositionLabels).map(function(k) { return '<option value="' + k + '" ' + (p.position===k?'selected':'') + '>' + ctPositionLabels[k] + '</option>'; }).join('') +
+      '</select></td>' +
+      '<td><input type="number" min="0" value="' + p.innings + '" onchange="ctUpdatePlayer(' + i + ',\'innings\',this.value)"></td>' +
+      '<td><button class="ct-remove-btn" onclick="ctRemovePlayer(' + i + ')" title="Remove">\u2715</button></td>';
+    body.appendChild(tr);
+  });
+  ctRenderBoard();
+}
+
+function ctEvaluatePlayer(p, age){
+  var fieldThrows = p.position === 'none' ? 0 : Math.round(p.innings * ctFieldThrowRates[p.position]);
+  var total = p.pitches + fieldThrows;
+  var restNeeded = ctGetTier(total, age);
+  return { fieldThrows: fieldThrows, total: total, restNeeded: restNeeded };
+}
+
+function ctRenderBoard(){
+  var ageEl = document.getElementById('ct-ageGroup');
+  if (!ageEl) return;
+  var age = parseInt(ageEl.value);
+  var daysToNext = parseInt(document.getElementById('ct-daysToNext').value) || 0;
+  var board = document.getElementById('ct-board');
+
+  var evaluated = ctPlayers
+    .filter(function(p) { return p.name.trim() !== ''; })
+    .map(function(p) {
+      var ev = ctEvaluatePlayer(p, age);
+      var deficit = ev.restNeeded - daysToNext;
+      var status;
+      if (deficit >= 2) status = 'red';
+      else if (deficit >= 1) status = 'amber';
+      else status = 'green';
+      return Object.assign({}, p, ev, { deficit: deficit, status: status });
+    })
+    .sort(function(a,b) { return b.deficit - a.deficit; });
+
+  board.innerHTML = '';
+
+  if (evaluated.length === 0){
+    board.innerHTML = '<div class="ct-empty-note">Add players with a name above to see the board.</div>';
+    return;
+  }
+
+  evaluated.forEach(function(p) {
+    var row = document.createElement('div');
+    row.className = 'ct-board-row ct-status-' + p.status;
+
+    var suggestion = '';
+    if (p.status !== 'green' && p.position !== 'none' && p.position !== 'low'){
+      var lightEv = ctEvaluatePlayer(Object.assign({}, p, { position: 'low' }), age);
+      var lightDeficit = lightEv.restNeeded - daysToNext;
+      var lightStatus = lightDeficit >= 2 ? 'still red' : lightDeficit >= 1 ? 'still amber' : 'clears to green';
+      suggestion = 'Move to OF/1B \u2192 ' + lightStatus;
+    } else if (p.status !== 'green' && p.position !== 'none'){
+      suggestion = 'Already at lowest-volume spot';
+    } else if (p.status !== 'green' && p.position === 'none'){
+      suggestion = 'Bench or lowest-volume spot only';
+    }
+
+    var detail = p.pitches + ' pitches';
+    if (p.position !== 'none') detail += ' + ~' + p.fieldThrows + ' est. field throws (' + ctPositionLabels[p.position] + ', ' + p.innings + ' inn.) = ~' + p.total + ' total';
+    detail += ' \u2014 needs ' + p.restNeeded + ' day' + (p.restNeeded!==1?'s':'') + ' rest, next game in ' + daysToNext + '.';
+
+    row.innerHTML =
+      '<div class="ct-board-name"><span class="ct-status-dot ct-dot-' + p.status + '"></span>' + p.name + '</div>' +
+      '<div class="ct-board-detail">' + detail + '</div>' +
+      (suggestion ? '<div class="ct-board-suggestion">' + suggestion + '</div>' : '');
+    board.appendChild(row);
+  });
 }
 
 </script>

@@ -1793,9 +1793,10 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
           </div>
 
           <!-- GENERATE PDF -->
-          <div style="padding:0 0 32px">
+          <div style="padding:0 0 32px;display:flex;flex-direction:column;gap:10px">
             <button class="btn-primary" onclick="generateArmScreenPDF()" style="width:100%;padding:16px;font-size:14px">Generate PDF Document</button>
-            <p style="font-size:12px;color:#7A7A85;margin-top:8px;text-align:center">Opens a print dialog — select Save as PDF to save to the athlete chart</p>
+            <button class="btn-secondary" onclick="showSection('home')" style="width:100%">Back to Home</button>
+            <p style="font-size:12px;color:#7A7A85;margin-top:4px;text-align:center">Opens a print dialog — select Save as PDF to save to the athlete chart</p>
           </div>
 
         </div>
@@ -1868,9 +1869,10 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
 
           </div>
 
-          <div style="margin-top:24px;display:flex;gap:10px">
+          <div style="margin-top:24px;display:flex;gap:10px;flex-wrap:wrap">
             <button class="btn-primary" onclick="generateProgPDF()" style="flex:1;padding:14px;font-size:14px">Generate PDF Program</button>
             <button class="btn-secondary" onclick="clearProgram()">Clear Program</button>
+            <button class="btn-secondary" onclick="showSection('home')">Back to Home</button>
           </div>
           <p style="font-size:12px;color:#7A7A85;margin-top:8px;text-align:center">Opens print dialog — select Save as PDF to save to athlete chart</p>
 
@@ -3562,8 +3564,8 @@ function generateProgPDF() {
   win.document.write('.notes-box{background:#FDFBF4;border:1px solid #E8D8A0;border-left:3px solid #C9A84C;padding:10px 12px;margin-bottom:16px;font-size:12px;line-height:1.6}');
   win.document.write('.notes-lbl{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#7A6000;margin-bottom:4px}');
   win.document.write('.ex-card{display:grid;grid-template-columns:100px 1fr;border:1px solid #E8E4DC;border-radius:4px;overflow:hidden;margin-bottom:10px;page-break-inside:avoid}');
-  win.document.write('.ex-photo{background:#1A2F4E;overflow:hidden}');
-  win.document.write('.ex-photo img{width:100%;height:100%;object-fit:cover;object-position:center 60%;display:block}');
+  win.document.write('.ex-photo{background:#1A2F4E;overflow:hidden;width:100px;max-height:90px}');
+  win.document.write('.ex-photo img{width:100%;height:90px;object-fit:cover;object-position:center 60%;display:block}');
   win.document.write('.ex-body{padding:10px 14px}');
   win.document.write('.ex-num{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#C9A84C;margin-bottom:3px}');
   win.document.write('.ex-name{font-size:14px;font-weight:700;color:#0F1E35;margin-bottom:5px}');

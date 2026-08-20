@@ -325,6 +325,30 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
 .rom-input:focus { border-color:#C9A84C; }
 .rom-select { width:100%;background:#FAFAF8;border:1px solid #E8E4DC;color:#1C1C1E;font-family:Arial,sans-serif;font-size:12px;padding:5px 4px;border-radius:3px;outline:none; }
 .rom-select:focus { border-color:#C9A84C; }
+
+.ex-lib-item { background:#fff; border:1px solid #E8E4DC; border-radius:4px; display:flex; align-items:center; gap:10px; padding:8px 10px; cursor:grab; user-select:none; }
+.ex-lib-item:hover { border-color:#C9A84C; background:#FDFBF4; }
+.ex-lib-thumb { width:48px; height:40px; background:#1A2F4E; border-radius:3px; flex-shrink:0; overflow:hidden; position:relative; }
+.ex-lib-thumb img { width:100%; height:100%; object-fit:cover; object-position:center 60%; }
+.ex-lib-info { flex:1; min-width:0; }
+.ex-lib-name { font-size:12px; font-weight:700; color:#0F1E35; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ex-lib-cat { font-size:10px; color:#C9A84C; font-weight:700; text-transform:uppercase; letter-spacing:1px; }
+.ex-lib-add { background:#0F1E35; color:#C9A84C; border:none; font-size:11px; font-weight:700; padding:5px 10px; border-radius:3px; cursor:pointer; flex-shrink:0; }
+.pb-item { background:#fff; border:1px solid #E8E4DC; border-radius:4px; padding:10px 12px; cursor:grab; position:relative; }
+.pb-item.dragging { opacity:0.5; border-style:dashed; }
+.pb-item.drag-over { border-color:#C9A84C; background:#FDFBF4; }
+.pb-item-hdr { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.pb-drag-handle { color:#C0C0C0; font-size:16px; cursor:grab; flex-shrink:0; }
+.pb-item-thumb { width:40px; height:34px; background:#1A2F4E; border-radius:2px; flex-shrink:0; overflow:hidden; position:relative; }
+.pb-item-thumb img { width:100%; height:100%; object-fit:cover; object-position:center 60%; }
+.pb-item-name { font-size:13px; font-weight:700; color:#0F1E35; flex:1; }
+.pb-item-remove { background:none; border:none; color:#C8402A; font-size:18px; cursor:pointer; padding:0; flex-shrink:0; line-height:1; }
+.pb-item-controls { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; align-items:center; }
+.pb-ctrl-label { font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#7A7A85; margin-bottom:3px; }
+.pb-ctrl-input { width:100%; background:#F5F4F0; border:1px solid #E8E4DC; color:#1C1C1E; font-family:Arial,sans-serif; font-size:13px; padding:6px 8px; border-radius:3px; text-align:center; outline:none; }
+.pb-ctrl-input:focus { border-color:#C9A84C; }
+.pb-item-instr { font-size:11px; color:#7A7A85; margin-top:6px; line-height:1.5; }
+@media (max-width:700px) { #progbuilder-form > div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
@@ -438,6 +462,7 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
         <div class="nav-item" onclick="showSection('throwbuilder')">Throwing Program Builder</div>
         <div class="nav-item" onclick="showSection('runjump')">Run/Jump Progression Builder</div>
         <div class="nav-item" onclick="showSection('armscreen')">Arm Care Screen</div>
+        <div class="nav-item" onclick="showSection('progbuilder')">Program Builder</div>
       </div>
       <div class="nav-section"><div class="nav-label">Reference</div>
         <div class="nav-item" onclick="showSection('install')">Install the App</div>
@@ -1776,6 +1801,82 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
         </div>
       </div>
 
+
+      <div class="section" id="sec-progbuilder">
+        <div class="sec-eyebrow">Clinical Tool - Staff Only</div>
+        <h1 class="sec-title">Exercise Program Builder</h1>
+        <div class="sec-sub">Select exercises, adjust sets and reps, drag to reorder, then generate a PDF for the athlete</div>
+        <div class="gold-bar"></div>
+
+        <div id="progbuilder-gate">
+          <div class="callout callout-navy">
+            <div class="clin-gate-sub">This tool is for AAM clinical staff. Enter the staff code to continue.</div>
+            <div style="display:flex;gap:10px;margin-top:12px;align-items:center">
+              <input type="password" id="progbuilder-code" placeholder="Staff code" class="form-input" style="max-width:180px;letter-spacing:3px;">
+              <button class="btn-primary" onclick="unlockProgBuilder()">Unlock</button>
+            </div>
+            <div id="progbuilder-err" style="color:#F08070;font-size:12px;margin-top:8px;min-height:16px"></div>
+          </div>
+        </div>
+
+        <div id="progbuilder-form" style="display:none">
+
+          <!-- PROGRAM INFO -->
+          <div class="tool-form">
+            <div class="form-row-2">
+              <div><label class="form-label">Athlete Name</label><input type="text" class="form-input" id="pb-athlete" placeholder="First Last"></div>
+              <div><label class="form-label">Program Name</label><input type="text" class="form-input" id="pb-progname" placeholder="e.g. Scapular Control Week 1"></div>
+            </div>
+            <div class="form-row-2">
+              <div><label class="form-label">Provider</label><input type="text" class="form-input" id="pb-provider" placeholder="Name and credential"></div>
+              <div><label class="form-label">Date</label><input type="date" class="form-input" id="pb-date"></div>
+            </div>
+            <div class="form-row"><label class="form-label">Program Instructions / Notes for Athlete</label>
+              <textarea class="form-textarea" id="pb-notes" placeholder="General instructions, frequency, when to perform this program..."></textarea>
+            </div>
+          </div>
+
+          <!-- TWO COLUMN LAYOUT -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+            <!-- LEFT: EXERCISE LIBRARY -->
+            <div>
+              <div class="h2">Exercise Library</div>
+              <div style="margin-bottom:10px">
+                <select class="form-select" id="pb-cat-filter" onchange="filterExLib()">
+                  <option value="">All Categories</option>
+                  <option>T-Spine Mobility</option>
+                  <option>Soft Tissue</option>
+                  <option>Static Stretching</option>
+                  <option>Dynamic Warm-Up</option>
+                  <option>Pre-Throw Bands</option>
+                  <option>Post-Throw Bands</option>
+                  <option>Scapular Control</option>
+                  <option>In-Game</option>
+                </select>
+              </div>
+              <div id="ex-lib-list" style="max-height:600px;overflow-y:auto;display:flex;flex-direction:column;gap:6px"></div>
+            </div>
+
+            <!-- RIGHT: PROGRAM -->
+            <div>
+              <div class="h2">Program <span style="font-size:12px;color:#7A7A85;font-weight:400" id="pb-count">(0 exercises)</span></div>
+              <div class="callout callout-gold" style="margin-bottom:10px;font-size:12px">Drag exercises here from the library, or click Add. Drag to reorder.</div>
+              <div id="pb-program-list" style="min-height:200px;background:#F5F4F0;border:2px dashed #E8E4DC;border-radius:6px;padding:8px;display:flex;flex-direction:column;gap:6px"></div>
+              <div style="margin-top:12px;text-align:center;color:#7A7A85;font-size:12px" id="pb-empty-msg">Add exercises from the library to build the program</div>
+            </div>
+
+          </div>
+
+          <div style="margin-top:24px;display:flex;gap:10px">
+            <button class="btn-primary" onclick="generateProgPDF()" style="flex:1;padding:14px;font-size:14px">Generate PDF Program</button>
+            <button class="btn-secondary" onclick="clearProgram()">Clear Program</button>
+          </div>
+          <p style="font-size:12px;color:#7A7A85;margin-top:8px;text-align:center">Opens print dialog — select Save as PDF to save to athlete chart</p>
+
+        </div>
+      </div>
+
 <div class="section" id="sec-contact">
         <div class="sec-eyebrow">Reference</div>
         <h1 class="sec-title">Contact and Social</h1>
@@ -1813,7 +1914,7 @@ document.getElementById('codeInput').onkeydown = function(e) { if (e.key === 'En
 document.querySelector('.gate-btn').addEventListener('click', function(e) { e.preventDefault(); checkCode(); });
 document.querySelector('.gate-btn').addEventListener('touchend', function(e) { e.preventDefault(); checkCode(); });
 
-var titles = {home:'Home',why:'Why Arm Care Matters',standards:'AAM Standards',redflags:'Red Flags',tspine:'T-Spine Mobility',foamroll:'Foam Roll',stretching:'Static Stretching',dynamic:'Dynamic Warm-Up',prebands:'Pre-Throw Bands',postbands:'Post-Throw Bands',scapular:'Scapular Control',twoout:'2-Out Drill',gethot:'Get Hot Routine',gameday:'Game Day Routines',longtoss:'Long Toss',mound:'Mound Progression',pitchcount:'Pitch Count Rules',recovery:'Recovery',youth:'Youth Arm Care',annual:'Annual Planning',throwingorder:'Daily Throwing Order',principles:'Arm Care Principles',readiness:'Arm Readiness Check',tracker:'Volume Tracker',scheduler:'Weekly Builder',install:'Install the App',faq:'FAQ',legal:'Legal and Disclaimer',contact:'Contact',throwbuilder:'Throwing Program Builder',armscreen:'Arm Care Screen',runjump:'Run/Jump Progression Builder'};
+var titles = {home:'Home',why:'Why Arm Care Matters',standards:'AAM Standards',redflags:'Red Flags',tspine:'T-Spine Mobility',foamroll:'Foam Roll',stretching:'Static Stretching',dynamic:'Dynamic Warm-Up',prebands:'Pre-Throw Bands',postbands:'Post-Throw Bands',scapular:'Scapular Control',twoout:'2-Out Drill',gethot:'Get Hot Routine',gameday:'Game Day Routines',longtoss:'Long Toss',mound:'Mound Progression',pitchcount:'Pitch Count Rules',recovery:'Recovery',youth:'Youth Arm Care',annual:'Annual Planning',throwingorder:'Daily Throwing Order',principles:'Arm Care Principles',readiness:'Arm Readiness Check',tracker:'Volume Tracker',scheduler:'Weekly Builder',install:'Install the App',faq:'FAQ',legal:'Legal and Disclaimer',contact:'Contact',throwbuilder:'Throwing Program Builder',armscreen:'Arm Care Screen',progbuilder:'Program Builder',runjump:'Run/Jump Progression Builder'};
 
 function showSection(id) {
   document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
@@ -3196,6 +3297,324 @@ function generateArmScreenPDF() {
   win.document.write('</body></html>');
   win.document.close();
   setTimeout(function() { win.print(); }, 500);
+}
+
+var EX_LIB = [
+{id:0,cat:'T-Spine Mobility',name:'Cat / Cow',ds:'1',dr:'10',instr:'Move slowly through flexion and extension with breathing throughout'},
+{id:1,cat:'T-Spine Mobility',name:'Foam Roll Extension',ds:'1',dr:'Each T-Spine level',instr:'Extend over the roller, support head, avoid low back'},
+{id:2,cat:'T-Spine Mobility',name:'Side Lying Open Books',ds:'1',dr:'10 ea',instr:'Rotate upper arm open, keep knees stacked'},
+{id:3,cat:'T-Spine Mobility',name:'Quadruped T-Spine Rotation',ds:'1',dr:'10 ea',instr:'Rotate through upper back, hips stay square, reach as far as you can'},
+{id:4,cat:'T-Spine Mobility',name:'Quadruped Thread the Needle',ds:'1',dr:'10 ea',instr:'Rotate through upper back, hips stay square'},
+{id:5,cat:'T-Spine Mobility',name:'Standing T-Spine Rotation',ds:'1',dr:'10 ea',instr:'Rotate chest side to side without leaning'},
+{id:6,cat:'Soft Tissue',name:'Hamstring',ds:'1',dr:'15-30 sec',instr:'Slow rolls, pause on tight areas; hook uninvolved side if able'},
+{id:7,cat:'Soft Tissue',name:'Calf',ds:'1',dr:'15-30 sec',instr:'Work ankle to knee, hook uninvolved leg for more pressure'},
+{id:8,cat:'Soft Tissue',name:'Quad',ds:'1',dr:'15-30 sec',instr:'Roll hip to knee, controlled pressure'},
+{id:9,cat:'Soft Tissue',name:'IT Band',ds:'1',dr:'15-30 sec',instr:'Light pressure, slow movement'},
+{id:10,cat:'Soft Tissue',name:'Glute',ds:'1',dr:'15-30 sec',instr:'Cross leg, roll side to side'},
+{id:11,cat:'Soft Tissue',name:'Adductor',ds:'1',dr:'15-30 sec',instr:'Gentle pressure, short range'},
+{id:12,cat:'Soft Tissue',name:'Lat',ds:'1',dr:'15-30 sec',instr:'Side-lying, roll arm pit to mid-back'},
+{id:13,cat:'Soft Tissue',name:'T-Spine Extension',ds:'1',dr:'15-30 sec',instr:'Roll mid-back only, support neck'},
+{id:14,cat:'Soft Tissue',name:'Pec Stretch',ds:'1',dr:'15-30 sec',instr:'Roller parallel to spine, stretching the pec'},
+{id:15,cat:'Static Stretching',name:'Active Hamstring',ds:'1',dr:'10',instr:'Extend the leg while holding the back of the thigh throughout'},
+{id:16,cat:'Static Stretching',name:'3-Way Hamstring',ds:'3',dr:'30 sec',instr:'Stretch in 3 angles: straight, across body, outward'},
+{id:17,cat:'Static Stretching',name:'Side Lying Quad',ds:'3',dr:'30 sec',instr:'On your side, pull heel toward glute, hips stacked'},
+{id:18,cat:'Static Stretching',name:'Doorway Pec',ds:'3',dr:'30 sec',instr:'Elbow at shoulder height, lean through; try different angles'},
+{id:19,cat:'Static Stretching',name:'Corner Stretch',ds:'3',dr:'30 sec',instr:'Lean forward slightly, stretch chest and shoulders'},
+{id:20,cat:'Static Stretching',name:'Modified Sleeper Stretch',ds:'3',dr:'30 sec',instr:'Shoulders stacked, pin chin to shoulder, move arm into IR - no forcing, no pain'},
+{id:21,cat:'Static Stretching',name:'Modified Cross Body Stretch',ds:'3',dr:'30 sec',instr:'Shoulders stacked, pull arm across chest'},
+{id:22,cat:'Static Stretching',name:'Kneeling Hip Flexor (Couch Stretch)',ds:'3',dr:'30 sec',instr:'Squeeze glute, keep ribs down, shift hips forward using chair'},
+{id:23,cat:'Static Stretching',name:'Frog Stretch',ds:'3',dr:'30 sec',instr:'Sit hips back, stretch inner thighs'},
+{id:24,cat:'Static Stretching',name:'World\'s Greatest Stretch',ds:'3',dr:'30 sec',instr:'Step forward, rotate toward lead leg, smooth motion'},
+{id:25,cat:'Dynamic Warm-Up',name:'Lateral Shuffle',ds:'1',dr:'15 yd',instr:'Stay low, chest tall, do not cross feet'},
+{id:26,cat:'Dynamic Warm-Up',name:'Carioca',ds:'1',dr:'15 yd',instr:'Rotate through the hips and trunk, stay relaxed'},
+{id:27,cat:'Dynamic Warm-Up',name:'Walking Lunges',ds:'1',dr:'15 yd',instr:'Long stride, knee in line with toes, chest upright'},
+{id:28,cat:'Dynamic Warm-Up',name:'Reverse Lunge with Rotation',ds:'1',dr:'15 yd',instr:'Step back, rotate toward lead leg, control movement'},
+{id:29,cat:'Dynamic Warm-Up',name:'Lateral Lunge',ds:'1',dr:'15 yd',instr:'Sit back in hips, keep opposite leg straight, push back to center'},
+{id:30,cat:'Dynamic Warm-Up',name:'High Knees',ds:'1',dr:'15 yd',instr:'Drive knees up under control, maintain good posture'},
+{id:31,cat:'Dynamic Warm-Up',name:'Butt Kicks',ds:'1',dr:'15 yd',instr:'Quick heel to glute motion, stay tall'},
+{id:32,cat:'Dynamic Warm-Up',name:'Standing Trunk Rotation',ds:'1',dr:'15 yd',instr:'Rotate through the thoracic spine, hips stay mostly forward'},
+{id:33,cat:'Dynamic Warm-Up',name:'Bent Over Open Books',ds:'1',dr:'15 yd',instr:'Rotate upper body while keeping hips stable'},
+{id:34,cat:'Dynamic Warm-Up',name:'Hip Hinge and Reach',ds:'1',dr:'15 yd',instr:'Hinge at hips, neutral spine, reach forward with arms'},
+{id:35,cat:'Dynamic Warm-Up',name:'Arm Swings Forward to Back',ds:'1',dr:'10',instr:'Relaxed arm motion, full range, not forcing motion'},
+{id:36,cat:'Dynamic Warm-Up',name:'Arm Swings Side to Side',ds:'1',dr:'10',instr:'Relaxed arm motion, full range, not forcing motion'},
+{id:37,cat:'Dynamic Warm-Up',name:'Arm Circles (Small and Large)',ds:'1',dr:'10',instr:'Controlled circles, gradually increase size'},
+{id:38,cat:'Dynamic Warm-Up',name:'Serratus Push Ups',ds:'1',dr:'10',instr:'Keep arms straight, move shoulder blades only'},
+{id:39,cat:'Dynamic Warm-Up',name:'Shoulder Rolls',ds:'1',dr:'10 ea',instr:'Smooth rolls forward and backward, relaxed motion'},
+{id:40,cat:'Pre-Throw Bands',name:'Wrist Flexion',ds:'1',dr:'8',instr:'Neutral hand, palms up, flex the wrist - slow and controlled'},
+{id:41,cat:'Pre-Throw Bands',name:'Wrist Extension',ds:'1',dr:'8',instr:'Neutral hand, palms down, extend the wrist - slow and controlled'},
+{id:42,cat:'Pre-Throw Bands',name:'Bicep Curl',ds:'1',dr:'8',instr:'Maintain good posture, bend at the elbow, contracting the bicep'},
+{id:43,cat:'Pre-Throw Bands',name:'Tricep Extension',ds:'1',dr:'8',instr:'Lock upper arm, extend through the elbow only'},
+{id:44,cat:'Pre-Throw Bands',name:'Scaption',ds:'1',dr:'8',instr:'Thumbs up, raise arms to 90 degrees, just outside of neutral'},
+{id:45,cat:'Pre-Throw Bands',name:'Low Row',ds:'1',dr:'8',instr:'Pull elbows back, squeeze shoulder blades'},
+{id:46,cat:'Pre-Throw Bands',name:'High Row',ds:'1',dr:'8',instr:'Pull elbows high, avoid shrugging'},
+{id:47,cat:'Pre-Throw Bands',name:'\"I\"',ds:'1',dr:'8',instr:'Straight arms, lift with control'},
+{id:48,cat:'Pre-Throw Bands',name:'\"Y\"',ds:'1',dr:'8',instr:'Lift arms at overhead angle, slow movement'},
+{id:49,cat:'Pre-Throw Bands',name:'\"T\"',ds:'1',dr:'8',instr:'Arms out to the side, squeeze between shoulder blades'},
+{id:50,cat:'Pre-Throw Bands',name:'Shoulder \"A\"',ds:'1',dr:'8',instr:'Elbow level with shoulder, small controlled motion'},
+{id:51,cat:'Pre-Throw Bands',name:'Shoulder Extension',ds:'1',dr:'8',instr:'Pull arm back without arching, squeezing shoulder blades'},
+{id:52,cat:'Pre-Throw Bands',name:'Shoulder \"W\" Robber',ds:'1',dr:'8',instr:'Pull elbows back, rotate hands outward'},
+{id:53,cat:'Pre-Throw Bands',name:'Shoulder Adduction',ds:'1',dr:'8',instr:'Pull arm down toward body, control movement'},
+{id:54,cat:'Pre-Throw Bands',name:'Overhead Lat Traction Activation',ds:'1',dr:'8',instr:'Half knee, straight back, pull down and rotate'},
+{id:55,cat:'Post-Throw Bands',name:'\"A\" Hold',ds:'1',dr:'8',instr:'Arms overhead, hands at the side of your head, hold'},
+{id:56,cat:'Post-Throw Bands',name:'External Rotation @ 90/90 Hold',ds:'1',dr:'8',instr:'Arms at 90/90, sustained hold'},
+{id:57,cat:'Post-Throw Bands',name:'\"T\" Hold',ds:'1',dr:'8',instr:'Arms out to the side, squeeze shoulder blades and hold'},
+{id:58,cat:'Post-Throw Bands',name:'Shoulder Extension Hold',ds:'1',dr:'8',instr:'Straight arms, pull shoulder blades back and hold'},
+{id:59,cat:'Post-Throw Bands',name:'Bicep Curl Hold @ 90/90',ds:'1',dr:'8',instr:'At your side, maintain a bicep curl with the shoulder at 90 degrees'},
+{id:60,cat:'Post-Throw Bands',name:'Wrist Flexion Hold',ds:'1',dr:'8',instr:'At your side, arm straight, flex at the wrist and hold'},
+{id:61,cat:'Post-Throw Bands',name:'Wrist Extension Hold',ds:'1',dr:'8',instr:'At your side, arm straight, extend the wrist and hold'},
+{id:62,cat:'In-Game',name:'Forearm Stretch',ds:'3',dr:'5 sec',instr:'Gentle stretch, no aggressive pulling'},
+{id:63,cat:'In-Game',name:'Cross Body Stretch',ds:'3',dr:'5 sec',instr:'Relax shoulder, pull across body at the elbow'},
+{id:64,cat:'In-Game',name:'Swims',ds:'1',dr:'5',instr:'Smooth arm circles through full range'},
+{id:65,cat:'In-Game',name:'Field Goals',ds:'1',dr:'5',instr:'Elbows at 90 degrees, palms neutral, ER at the shoulder then press up'},
+{id:66,cat:'In-Game',name:'Hugs',ds:'1',dr:'5',instr:'Wrap arms around chest, open wide'},
+{id:67,cat:'In-Game',name:'Arm Circles (Small and Large)',ds:'1',dr:'5 ea way',instr:'Controlled speed, full motion - small and large'},
+{id:68,cat:'In-Game',name:'Bent Over Trunk Rotation',ds:'1',dr:'5 ea',instr:'Rotate chest side to side, stay hinged'}
+];
+function getExPhoto(exName) {
+  var cards = document.querySelectorAll('.ex-card');
+  for (var i = 0; i < cards.length; i++) {
+    var nameEl = cards[i].querySelector('.ex-name');
+    if (nameEl && nameEl.textContent.trim() === exName) {
+      var img = cards[i].querySelector('.ex-photo img');
+      if (img) return img.src;
+    }
+  }
+  return '';
+}
+
+var pbProgram = [];
+var dragSrcId = null;
+
+function unlockProgBuilder() {
+  var v = document.getElementById('progbuilder-code').value.trim().toUpperCase();
+  if (v === TB_CODE.toUpperCase()) {
+    document.getElementById('progbuilder-gate').style.display = 'none';
+    document.getElementById('progbuilder-form').style.display = 'block';
+    var d = new Date().toISOString().split('T')[0];
+    document.getElementById('pb-date').value = d;
+    renderExLib();
+  } else {
+    document.getElementById('progbuilder-err').textContent = 'Incorrect staff code.';
+  }
+}
+
+function filterExLib() {
+  renderExLib();
+}
+
+function renderExLib() {
+  var cat = document.getElementById('pb-cat-filter').value;
+  var filtered = cat ? EX_LIB.filter(function(e){ return e.cat === cat; }) : EX_LIB;
+  var el = document.getElementById('ex-lib-list');
+  if (!el) return;
+  el.innerHTML = '';
+  filtered.forEach(function(ex) {
+    var div = document.createElement('div');
+    div.className = 'ex-lib-item';
+    div.draggable = true;
+    div.dataset.exid = ex.id;
+    div.innerHTML = '<div class="ex-lib-thumb"><img src="' + getExPhoto(ex.name) + '" alt=""></div>'
+      + '<div class="ex-lib-info"><div class="ex-lib-name">' + ex.name + '</div><div class="ex-lib-cat">' + ex.cat + '</div></div>'
+      + '<button class="ex-lib-add" onclick="addToProg(' + ex.id + ')">Add</button>';
+    div.addEventListener('dragstart', function(e) {
+      e.dataTransfer.setData('text/plain', 'lib:' + ex.id);
+      e.dataTransfer.effectAllowed = 'copy';
+    });
+    el.appendChild(div);
+  });
+}
+
+function addToProg(exId) {
+  var ex = EX_LIB.find(function(e){ return e.id === exId; });
+  if (!ex) return;
+  var item = { uid: Date.now() + Math.random(), exId: exId, name: ex.name, sets: ex.ds, reps: ex.dr, instr: ex.instr, photo: getExPhoto(ex.name) };
+  pbProgram.push(item);
+  renderProgram();
+}
+
+function removeFromProg(uid) {
+  pbProgram = pbProgram.filter(function(i){ return i.uid !== uid; });
+  renderProgram();
+}
+
+function clearProgram() {
+  if (pbProgram.length && !confirm('Clear all exercises from the program?')) return;
+  pbProgram = [];
+  renderProgram();
+}
+
+function renderProgram() {
+  var el = document.getElementById('pb-program-list');
+  var msg = document.getElementById('pb-empty-msg');
+  var cnt = document.getElementById('pb-count');
+  if (!el) return;
+  if (cnt) cnt.textContent = '(' + pbProgram.length + ' exercise' + (pbProgram.length !== 1 ? 's' : '') + ')';
+  if (!pbProgram.length) {
+    el.innerHTML = '';
+    if (msg) msg.style.display = 'block';
+    return;
+  }
+  if (msg) msg.style.display = 'none';
+  el.innerHTML = '';
+  pbProgram.forEach(function(item, idx) {
+    var div = document.createElement('div');
+    div.className = 'pb-item';
+    div.draggable = true;
+    div.dataset.uid = item.uid;
+    div.innerHTML = '<div class="pb-item-hdr">'
+      + '<div class="pb-drag-handle">&#9776;</div>'
+      + '<div class="pb-item-thumb"><img src="' + item.photo + '" alt=""></div>'
+      + '<div class="pb-item-name">' + item.name + '</div>'
+      + '<button class="pb-item-remove" onclick="removeFromProg(' + item.uid + ')">&#215;</button>'
+      + '</div>'
+      + '<div class="pb-item-controls">'
+      + '<div><div class="pb-ctrl-label">Sets</div><input type="text" class="pb-ctrl-input" value="' + item.sets + '" data-uid="' + item.uid + '" data-field="sets" onchange="updateProgField(this)"></div>'
+      + '<div><div class="pb-ctrl-label">Reps / Duration</div><input type="text" class="pb-ctrl-input" value="' + item.reps + '" data-uid="' + item.uid + '" data-field="reps" onchange="updateProgField(this)"></div>'
+      + '<div><div class="pb-ctrl-label">Rest</div><input type="text" class="pb-ctrl-input" value="" placeholder="e.g. 60s" data-uid="' + item.uid + '" data-field="rest" onchange="updateProgField(this)"></div>'
+      + '</div>'
+      + '<div class="pb-item-instr">' + item.instr + '</div>';
+
+    // Drag to reorder
+    div.addEventListener('dragstart', function(e) {
+      dragSrcId = item.uid;
+      e.dataTransfer.effectAllowed = 'move';
+      setTimeout(function(){ div.classList.add('dragging'); }, 0);
+    });
+    div.addEventListener('dragend', function() { div.classList.remove('dragging'); });
+    div.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      div.classList.add('drag-over');
+    });
+    div.addEventListener('dragleave', function() { div.classList.remove('drag-over'); });
+    div.addEventListener('drop', function(e) {
+      e.preventDefault();
+      div.classList.remove('drag-over');
+      var data = e.dataTransfer.getData('text/plain');
+      if (data && data.startsWith('lib:')) {
+        // Dropping from library - insert at this position
+        var exId = parseInt(data.split(':')[1]);
+        var ex = EX_LIB.find(function(x){ return x.id === exId; });
+        if (ex) {
+          var newItem = { uid: Date.now() + Math.random(), exId: exId, name: ex.name, sets: ex.ds, reps: ex.dr, instr: ex.instr, photo: ex.photo };
+          var targetIdx = pbProgram.findIndex(function(i){ return i.uid === item.uid; });
+          pbProgram.splice(targetIdx, 0, newItem);
+          renderProgram();
+        }
+      } else if (dragSrcId && dragSrcId !== item.uid) {
+        // Reordering
+        var srcIdx = pbProgram.findIndex(function(i){ return i.uid === dragSrcId; });
+        var tgtIdx = pbProgram.findIndex(function(i){ return i.uid === item.uid; });
+        if (srcIdx >= 0 && tgtIdx >= 0) {
+          var moved = pbProgram.splice(srcIdx, 1)[0];
+          pbProgram.splice(tgtIdx, 0, moved);
+          renderProgram();
+        }
+      }
+      dragSrcId = null;
+    });
+
+    el.appendChild(div);
+  });
+
+  // Allow drop on empty area
+  el.ondragover = function(e) { e.preventDefault(); };
+  el.ondrop = function(e) {
+    e.preventDefault();
+    var data = e.dataTransfer.getData('text/plain');
+    if (data && data.startsWith('lib:')) {
+      var exId = parseInt(data.split(':')[1]);
+      addToProg(exId);
+    }
+  };
+}
+
+function updateProg(uid, field, val) {
+  var item = pbProgram.find(function(i){ return i.uid === uid; });
+  if (item) item[field] = val;
+}
+function updateProgField(el) {
+  var uid = parseFloat(el.dataset.uid);
+  var field = el.dataset.field;
+  var item = pbProgram.find(function(i){ return i.uid === uid; });
+  if (item) item[field] = el.value;
+}
+
+function generateProgPDF() {
+  if (!pbProgram.length) { alert('Add at least one exercise to generate a program.'); return; }
+  var athlete = document.getElementById('pb-athlete').value || 'Athlete';
+  var progname = document.getElementById('pb-progname').value || 'Custom Program';
+  var provider = document.getElementById('pb-provider').value || '—';
+  var date = document.getElementById('pb-date').value || '';
+  var notes = document.getElementById('pb-notes').value || '';
+
+  var win = window.open('', '_blank');
+  win.document.write('<html><head><title>' + progname + ' - ' + athlete + '</title>');
+  win.document.write('<style>');
+  win.document.write('*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:12px;color:#1C1C1E;padding:20px}');
+  win.document.write('.hdr{background:#0F1E35;color:#fff;padding:16px 20px;margin-bottom:16px;border-bottom:3px solid #C9A84C}');
+  win.document.write('.hdr-eyebrow{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#C9A84C;margin-bottom:4px}');
+  win.document.write('.hdr-title{font-size:20px;font-weight:700;margin-bottom:2px}');
+  win.document.write('.hdr-meta{font-size:11px;color:#7A9AB5}');
+  win.document.write('.info-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}');
+  win.document.write('.info-item{background:#F5F4F0;padding:8px;border-radius:3px}');
+  win.document.write('.info-lbl{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#7A7A85;margin-bottom:2px}');
+  win.document.write('.info-val{font-size:12px;font-weight:700;color:#0F1E35}');
+  win.document.write('.notes-box{background:#FDFBF4;border:1px solid #E8D8A0;border-left:3px solid #C9A84C;padding:10px 12px;margin-bottom:16px;font-size:12px;line-height:1.6}');
+  win.document.write('.notes-lbl{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#7A6000;margin-bottom:4px}');
+  win.document.write('.ex-card{display:grid;grid-template-columns:100px 1fr;border:1px solid #E8E4DC;border-radius:4px;overflow:hidden;margin-bottom:10px;page-break-inside:avoid}');
+  win.document.write('.ex-photo{background:#1A2F4E;overflow:hidden}');
+  win.document.write('.ex-photo img{width:100%;height:100%;object-fit:cover;object-position:center 60%;display:block}');
+  win.document.write('.ex-body{padding:10px 14px}');
+  win.document.write('.ex-num{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#C9A84C;margin-bottom:3px}');
+  win.document.write('.ex-name{font-size:14px;font-weight:700;color:#0F1E35;margin-bottom:5px}');
+  win.document.write('.ex-dose{display:flex;gap:16px;margin-bottom:6px}');
+  win.document.write('.ex-dose-item{background:#0F1E35;color:#fff;padding:3px 8px;border-radius:2px;font-size:11px;font-weight:700}');
+  win.document.write('.ex-instr{font-size:11px;color:#4A4A52;line-height:1.6}');
+  win.document.write('.footer{margin-top:20px;padding-top:10px;border-top:1px solid #E8E4DC;font-size:10px;color:#7A7A85;display:flex;justify-content:space-between}');
+  win.document.write('@media print{.hdr,.info-item,.ex-dose-item{-webkit-print-color-adjust:exact;print-color-adjust:exact}}');
+  win.document.write('</style></head><body>');
+
+  win.document.write('<div class="hdr">');
+  win.document.write('<div class="hdr-eyebrow">Advanced Athletic Medicine &mdash; Athlete Program</div>');
+  win.document.write('<div class="hdr-title">' + progname + '</div>');
+  win.document.write('<div class="hdr-meta">Confidential &mdash; For ' + athlete + ' Only</div>');
+  win.document.write('</div>');
+
+  win.document.write('<div class="info-bar">');
+  win.document.write('<div class="info-item"><div class="info-lbl">Athlete</div><div class="info-val">' + athlete + '</div></div>');
+  win.document.write('<div class="info-item"><div class="info-lbl">Date</div><div class="info-val">' + date + '</div></div>');
+  win.document.write('<div class="info-item"><div class="info-lbl">Provider</div><div class="info-val">' + provider + '</div></div>');
+  win.document.write('<div class="info-item"><div class="info-lbl">Exercises</div><div class="info-val">' + pbProgram.length + '</div></div>');
+  win.document.write('</div>');
+
+  if (notes) {
+    win.document.write('<div class="notes-box"><div class="notes-lbl">Program Instructions</div>' + notes + '</div>');
+  }
+
+  pbProgram.forEach(function(item, idx) {
+    var rest = item.rest ? item.rest : '—';
+    win.document.write('<div class="ex-card">');
+    win.document.write('<div class="ex-photo"><img src="' + item.photo + '" alt="' + item.name + '"></div>');
+    win.document.write('<div class="ex-body">');
+    win.document.write('<div class="ex-num">Exercise ' + (idx+1) + '</div>');
+    win.document.write('<div class="ex-name">' + item.name + '</div>');
+    win.document.write('<div class="ex-dose">');
+    win.document.write('<div class="ex-dose-item">Sets: ' + (item.sets||'—') + '</div>');
+    win.document.write('<div class="ex-dose-item">Reps: ' + (item.reps||'—') + '</div>');
+    win.document.write('<div class="ex-dose-item">Rest: ' + rest + '</div>');
+    win.document.write('</div>');
+    win.document.write('<div class="ex-instr">' + item.instr + '</div>');
+    win.document.write('</div></div>');
+  });
+
+  win.document.write('<div class="footer">');
+  win.document.write('<div>Provider: ' + provider + ' &nbsp;&middot;&nbsp; Advanced Athletic Medicine</div>');
+  win.document.write('<div>This program is clinical guidance. Follow as directed by your provider. &nbsp;&middot;&nbsp; 2026</div>');
+  win.document.write('</div>');
+
+  win.document.write('</body></html>');
+  win.document.close();
+  setTimeout(function(){ win.print(); }, 600);
 }
 
 </script>

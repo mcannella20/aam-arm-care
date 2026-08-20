@@ -3563,9 +3563,9 @@ function generateProgPDF() {
   win.document.write('.info-val{font-size:12px;font-weight:700;color:#0F1E35}');
   win.document.write('.notes-box{background:#FDFBF4;border:1px solid #E8D8A0;border-left:3px solid #C9A84C;padding:10px 12px;margin-bottom:16px;font-size:12px;line-height:1.6}');
   win.document.write('.notes-lbl{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#7A6000;margin-bottom:4px}');
-  win.document.write('.ex-card{display:grid;grid-template-columns:100px 1fr;border:1px solid #E8E4DC;border-radius:4px;overflow:hidden;margin-bottom:10px;page-break-inside:avoid}');
-  win.document.write('.ex-photo{background:#1A2F4E;overflow:hidden;width:100px;max-height:90px}');
-  win.document.write('.ex-photo img{width:100%;height:90px;object-fit:cover;object-position:center 60%;display:block}');
+  win.document.write('.ex-card{display:grid;grid-template-columns:90px 1fr;border:1px solid #E8E4DC;border-radius:4px;overflow:hidden;margin-bottom:10px;page-break-inside:avoid;height:100px}');
+  win.document.write('.ex-photo{background:#1A2F4E;overflow:hidden;width:90px;height:100px;flex-shrink:0}');
+  win.document.write('.ex-photo img{width:90px;height:100px;object-fit:cover;object-position:center 60%;display:block;position:absolute;top:0;left:0}');
   win.document.write('.ex-body{padding:10px 14px}');
   win.document.write('.ex-num{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#C9A84C;margin-bottom:3px}');
   win.document.write('.ex-name{font-size:14px;font-weight:700;color:#0F1E35;margin-bottom:5px}');
@@ -3596,7 +3596,7 @@ function generateProgPDF() {
   pbProgram.forEach(function(item, idx) {
     var rest = item.rest ? item.rest : '—';
     win.document.write('<div class="ex-card">');
-    win.document.write('<div class="ex-photo"><img src="' + item.photo + '" alt="' + item.name + '"></div>');
+    win.document.write('<div class="ex-photo" style="position:relative"><img src="' + item.photo + '" alt="' + item.name + '" style="width:90px;height:100px;object-fit:cover;object-position:center 60%;display:block;"></div>');
     win.document.write('<div class="ex-body">');
     win.document.write('<div class="ex-num">Exercise ' + (idx+1) + '</div>');
     win.document.write('<div class="ex-name">' + item.name + '</div>');

@@ -1437,6 +1437,13 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
   </div>
 
   <div id="wb-content" style="display:none">
+    <div class="tool-form" id="wb-assign-row" style="display:none">
+      <label class="form-label">Assign This Program To</label>
+      <select class="form-select" id="wb-athlete-select" onchange="wbLoadForAthlete()">
+        <option value="">Generic Template (not tied to a specific athlete)</option>
+      </select>
+      <div class="tb-privacy-note" id="wb-assign-note" style="display:none">Saving now updates this athlete's plan directly &mdash; they'll see it on their Home screen next time they log in.</div>
+    </div>
     <div class="tb-table-wrap" id="wb-table-wrap"></div>
     <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
       <button class="btn-primary" onclick="wbSave()">Save My Schedule</button>
@@ -2441,6 +2448,9 @@ var wbOptionsBySection = {
 function wbGetOptions(sectionName) { return wbOptionsBySection[sectionName] || ['Off','Complete','N/A']; }
 function wbEsc(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+var wbActiveSections = null;
+var wbCurrentAthleteId = null;
+
 function wbLoad() {
   try {
     var raw = localStorage.getItem('aamWeeklyPlan');
@@ -2452,10 +2462,11 @@ function wbLoad() {
   }
 }
 
-function wbRenderTable() {
+function wbRenderTable(sectionsOverride) {
   var wrap = document.getElementById('wb-table-wrap');
   if (!wrap) return;
-  var sections = wbLoad();
+  wbActiveSections = sectionsOverride || wbLoad();
+  var sections = wbActiveSections;
   var html = '<table class="tbl wb-table"><thead><tr>' + wbDays.map(function(d) { return '<th>' + d + '</th>'; }).join('') + '</tr></thead><tbody>';
   sections.forEach(function(sec, si) {
     html += '<tr class="wb-section-row"><td colspan="7">' + sec.name + '</td></tr>';
@@ -2496,16 +2507,16 @@ function wbSelectChange(sel) {
 }
 
 function wbAddRow(si) {
-  var sections = wbLoad();
+  var sections = wbActiveSections || wbLoad();
   var sec = sections[si];
   if (!sec) return;
   sec.rows.push(sec.freeform ? [''] : ['','','','','','','']);
-  localStorage.setItem('aamWeeklyPlan', JSON.stringify({ sections: sections }));
-  wbRenderTable();
+  if (!wbCurrentAthleteId) localStorage.setItem('aamWeeklyPlan', JSON.stringify({ sections: sections }));
+  wbRenderTable(sections);
 }
 
-function wbSave() {
-  var sections = wbLoad();
+async function wbSave() {
+  var sections = wbActiveSections || wbLoad();
   document.querySelectorAll('#wb-table-wrap select.wb-select').forEach(function(sel) {
     var si = parseInt(sel.getAttribute('data-si'), 10);
     var ri = parseInt(sel.getAttribute('data-ri'), 10);
@@ -2523,18 +2534,82 @@ function wbSave() {
     var ci = parseInt(td.getAttribute('data-ci'), 10) || 0;
     if (sections[si] && sections[si].rows[ri]) sections[si].rows[ri][ci] = td.textContent;
   });
-  localStorage.setItem('aamWeeklyPlan', JSON.stringify({ sections: sections }));
-  renderHomeSchedule();
+  wbActiveSections = sections;
+
   var msg = document.getElementById('sched-msg');
+
+  if (wbCurrentAthleteId) {
+    var sb = getSb();
+    if (!sb) { alert('Not connected to the account system. Check your internet connection and try again.'); return; }
+    var userRes = await sb.auth.getUser();
+    var user = userRes.data.user;
+    var res = await sb.from('weekly_plans').upsert(
+      { athlete_id: wbCurrentAthleteId, plan: { sections: sections }, updated_by: user.id, updated_at: new Date().toISOString() },
+      { onConflict: 'athlete_id' }
+    );
+    if (res.error) { alert(res.error.message); return; }
+    msg.textContent = 'Saved and shared with athlete';
+  } else {
+    localStorage.setItem('aamWeeklyPlan', JSON.stringify({ sections: sections }));
+    msg.textContent = 'Schedule saved';
+    renderHomeSchedule();
+  }
   msg.style.display = 'block';
-  setTimeout(function() { msg.style.display = 'none'; }, 2000);
+  setTimeout(function() { msg.style.display = 'none'; }, 2500);
 }
 
 function wbReset() {
-  if (!confirm("Reset to the default AAM template? This clears anything you've customized.")) return;
-  localStorage.removeItem('aamWeeklyPlan');
-  wbRenderTable();
-  renderHomeSchedule();
+  if (!confirm("Reset to the default AAM template? This clears anything you've customized (won't save until you hit Save).")) return;
+  var fresh = JSON.parse(JSON.stringify(wbDefaultSections));
+  if (wbCurrentAthleteId) {
+    wbRenderTable(fresh);
+  } else {
+    localStorage.removeItem('aamWeeklyPlan');
+    wbRenderTable();
+    renderHomeSchedule();
+  }
+}
+
+async function wbPopulateAthleteDropdown() {
+  var sel = document.getElementById('wb-athlete-select');
+  var assignRow = document.getElementById('wb-assign-row');
+  if (!sel || !assignRow) return;
+  var ok = await ensureSupabaseLoaded();
+  if (!ok) return;
+  var sb = getSb();
+  if (!sb) return;
+  var userRes = await sb.auth.getUser();
+  var user = userRes.data.user;
+  if (!user) return;
+  var role = user.user_metadata && user.user_metadata.role;
+  if (role !== 'coach') return;
+
+  var teamRes = await sb.from('teams').select('id').eq('coach_id', user.id).limit(1).maybeSingle();
+  if (!teamRes.data) return;
+  var athRes = await sb.from('athletes').select('id, full_name').eq('team_id', teamRes.data.id).order('full_name');
+  if (!athRes.data || !athRes.data.length) return;
+
+  while (sel.options.length > 1) sel.remove(1);
+  athRes.data.forEach(function(a) {
+    var opt = document.createElement('option');
+    opt.value = a.id;
+    opt.textContent = a.full_name;
+    sel.appendChild(opt);
+  });
+  assignRow.style.display = 'block';
+}
+
+async function wbLoadForAthlete() {
+  var sel = document.getElementById('wb-athlete-select');
+  var note = document.getElementById('wb-assign-note');
+  wbCurrentAthleteId = sel.value || null;
+  if (note) note.style.display = wbCurrentAthleteId ? 'block' : 'none';
+  if (!wbCurrentAthleteId) { wbRenderTable(); return; }
+  var sb = getSb();
+  if (!sb) return;
+  var res = await sb.from('weekly_plans').select('plan').eq('athlete_id', wbCurrentAthleteId).maybeSingle();
+  var sections = (res.data && res.data.plan && res.data.plan.sections) ? res.data.plan.sections : JSON.parse(JSON.stringify(wbDefaultSections));
+  wbRenderTable(sections);
 }
 
 // INIT ON LOGIN
@@ -2773,28 +2848,61 @@ function buildDailyFocus() {
 
 
 // HOME SCHEDULE CARD
-function renderHomeSchedule() {
+async function renderHomeSchedule() {
   var card = document.getElementById('home-schedule-card');
   var spacer = document.getElementById('hsc-spacer');
   var list = document.getElementById('hsc-list');
   var hdrTitle = document.getElementById('hsc-hdr-title');
   if (!card || !list) return;
-  var raw = localStorage.getItem('aamWeeklyPlan');
-  if (!raw) {
-    card.style.display = 'none';
-    if (spacer) spacer.style.display = 'none';
-    return;
-  }
-  var sections;
-  try { sections = JSON.parse(raw).sections; } catch (e) { sections = null; }
+
+  var sections = null;
+  var sourceLabel = '';
+
+  try {
+    var ok = await ensureSupabaseLoaded();
+    if (ok) {
+      var sb = getSb();
+      var sess = sb ? (await sb.auth.getSession()) : null;
+      var user = sess && sess.data && sess.data.session && sess.data.session.user;
+      if (user) {
+        var role = user.user_metadata && user.user_metadata.role;
+        var athleteId = null;
+        if (role === 'athlete') {
+          var athRes = await sb.from('athletes').select('id').eq('athlete_user_id', user.id).maybeSingle();
+          if (athRes.data) athleteId = athRes.data.id;
+        } else if (role === 'parent') {
+          var linkRes = await sb.from('athlete_parents').select('athlete_id').eq('parent_user_id', user.id).limit(1).maybeSingle();
+          if (linkRes.data) athleteId = linkRes.data.athlete_id;
+        }
+        if (athleteId) {
+          var planRes = await sb.from('weekly_plans').select('plan').eq('athlete_id', athleteId).maybeSingle();
+          if (planRes.data && planRes.data.plan && planRes.data.plan.sections) {
+            sections = planRes.data.plan.sections;
+            sourceLabel = ' (from your coach)';
+          }
+        }
+      }
+    }
+  } catch (e) { /* fall through to local plan below */ }
+
   if (!sections) {
-    card.style.display = 'none';
-    if (spacer) spacer.style.display = 'none';
-    return;
+    var raw = localStorage.getItem('aamWeeklyPlan');
+    if (!raw) {
+      card.style.display = 'none';
+      if (spacer) spacer.style.display = 'none';
+      return;
+    }
+    try { sections = JSON.parse(raw).sections; } catch (e) { sections = null; }
+    if (!sections) {
+      card.style.display = 'none';
+      if (spacer) spacer.style.display = 'none';
+      return;
+    }
   }
+
   var todayIdx = new Date().getDay(); // 0=Sun matches wbDays index
   var fullDayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-  if (hdrTitle) hdrTitle.textContent = "Today's Plan \u2014 " + fullDayName;
+  if (hdrTitle) hdrTitle.textContent = "Today's Plan \u2014 " + fullDayName + sourceLabel;
 
   var rowsHtml = sections.map(function(sec) {
     if (sec.freeform) return ''; // skip Notes - not day-specific
@@ -2884,6 +2992,7 @@ function checkClinCode(prefix) {
 function clinUnlockAll() {
   sessionStorage.setItem('aamClinUnlocked', '1');
   ensureDocxLoaded();
+  wbPopulateAthleteDropdown();
   ['tb', 'rj', 'wb'].forEach(function(prefix) {
     var gate = document.getElementById(prefix + '-gate');
     var content = document.getElementById(prefix + '-content');

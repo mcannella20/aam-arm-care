@@ -71,6 +71,20 @@
 #sec-coaches .ct-landing-footer a{color:#1c3466;font-weight:600;text-decoration:none;}
 #sec-coaches .ct-landing-footer a:hover{text-decoration:underline;}
 * { box-sizing: border-box; margin: 0; padding: 0; }
+.acct-box { max-width: 380px; margin: 10px auto; background: #1A2F4E; border-radius: 6px; padding: 30px; }
+.acct-tabs { display: flex; margin-bottom: 20px; border-radius: 4px; overflow: hidden; border: 1px solid #2A4568; }
+.acct-tab { flex: 1; text-align: center; padding: 10px; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #8A9BB0; cursor: pointer; background: transparent; }
+.acct-tab.active { background: #C9A84C; color: #0F1E35; }
+.acct-field { margin-bottom: 14px; }
+.acct-field label { display: block; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #8A9BB0; margin-bottom: 6px; }
+.acct-field input, .acct-field select { width: 100%; background: rgba(255,255,255,0.08); border: 2px solid #2A4568; color: #fff; font-size: 14px; padding: 10px; border-radius: 3px; font-family: Arial, sans-serif; }
+.acct-field input:focus, .acct-field select:focus { outline: none; border-color: #C9A84C; }
+.acct-field select option { background: #1A2F4E; color: #fff; }
+.acct-msg { font-size: 13px; margin: 12px 0; padding: 10px 12px; border-radius: 4px; line-height: 1.5; }
+.acct-msg.error { background: rgba(200,64,42,0.15); color: #F08070; }
+.acct-msg.success { background: rgba(76,128,98,0.15); color: #7ADB9E; }
+.acct-loggedin-card { background: #1A2F4E; border-radius: 6px; padding: 30px; max-width: 380px; margin: 10px auto; text-align: center; }
+.acct-role-badge { display: inline-block; background: #C9A84C; color: #0F1E35; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 4px 12px; border-radius: 12px; margin-top: 8px; }
 body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
 #gate { position: fixed; inset: 0; background: #0F1E35; display: flex; align-items: center; justify-content: center; z-index: 999; }
 .gate-box { background: #1A2F4E; border-top: 4px solid #C9A84C; padding: 40px; width: min(400px, 90vw); text-align: center; border-radius: 4px; }
@@ -523,6 +537,9 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
   <div class="layout">
     <div id="sidebar">
       <div class="nav-section"><div class="nav-label">Home</div><div class="nav-item active" onclick="showSection('home')">Home</div></div>
+      <div class="nav-section"><div class="nav-label">Account</div>
+        <div class="nav-item" id="nav-account-item" onclick="showSection('account')">Log In / Sign Up</div>
+      </div>
       <div class="nav-section"><div class="nav-label">Foundation</div>
         <div class="nav-item" onclick="showSection('why')">Why Arm Care Matters</div>
         <div class="nav-item" onclick="showSection('standards')">AAM Standards</div>
@@ -2014,6 +2031,57 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
   </div>
 </div>
 
+<div class="section" id="sec-account">
+  <div class="sec-eyebrow">Account</div>
+  <h1 class="sec-title">Log In / Sign Up</h1>
+  <div class="sec-sub">Coaches, parents, and athletes each get their own account</div>
+  <div class="gold-bar"></div>
+
+  <div id="acct-loggedout">
+    <div class="acct-box">
+      <div class="acct-tabs">
+        <div class="acct-tab active" id="acct-tab-login" onclick="acctSwitchTab('login')">Log In</div>
+        <div class="acct-tab" id="acct-tab-signup" onclick="acctSwitchTab('signup')">Sign Up</div>
+      </div>
+
+      <div id="acct-login-form">
+        <div class="acct-field"><label>Email</label><input type="email" id="acct-login-email" autocomplete="email"></div>
+        <div class="acct-field"><label>Password</label><input type="password" id="acct-login-password" autocomplete="current-password"></div>
+        <button class="gate-btn" onclick="acctLogIn()" id="acct-login-btn">Log In</button>
+      </div>
+
+      <div id="acct-signup-form" style="display:none">
+        <div class="acct-field"><label>Full Name</label><input type="text" id="acct-signup-name" autocomplete="name"></div>
+        <div class="acct-field"><label>Email</label><input type="email" id="acct-signup-email" autocomplete="email"></div>
+        <div class="acct-field"><label>Password</label><input type="password" id="acct-signup-password" autocomplete="new-password"></div>
+        <div class="acct-field">
+          <label>I am a...</label>
+          <select id="acct-signup-role">
+            <option value="coach">Coach</option>
+            <option value="parent">Parent</option>
+            <option value="athlete">Athlete</option>
+          </select>
+        </div>
+        <button class="gate-btn" onclick="acctSignUp()" id="acct-signup-btn">Create Account</button>
+      </div>
+
+      <div class="acct-msg" id="acct-msg" style="display:none"></div>
+    </div>
+  </div>
+
+  <div id="acct-loggedin" style="display:none">
+    <div class="acct-loggedin-card">
+      <div class="clin-gate-lbl">Logged In</div>
+      <div style="color:#fff;font-size:18px;font-weight:700;margin-top:6px" id="acct-name-display"></div>
+      <div style="color:#8A9BB0;font-size:13px;margin-top:2px" id="acct-email-display"></div>
+      <div class="acct-role-badge" id="acct-role-display"></div>
+      <div style="margin-top:24px">
+        <button class="gate-btn" onclick="acctLogOut()" style="background:#2A4568">Log Out</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="section" id="sec-contact">
         <div class="sec-eyebrow">Reference</div>
         <h1 class="sec-title">Contact and Social</h1>
@@ -2051,7 +2119,7 @@ document.getElementById('codeInput').onkeydown = function(e) { if (e.key === 'En
 document.querySelector('.gate-btn').addEventListener('click', function(e) { e.preventDefault(); checkCode(); });
 document.querySelector('.gate-btn').addEventListener('touchend', function(e) { e.preventDefault(); checkCode(); });
 
-var titles = {home:'Home',why:'Why Arm Care Matters',standards:'AAM Standards',redflags:'Red Flags',tspine:'T-Spine Mobility',foamroll:'Foam Roll',stretching:'Static Stretching',dynamic:'Dynamic Warm-Up',prebands:'Pre-Throw Bands',postbands:'Post-Throw Bands',scapular:'Scapular Control',twoout:'2-Out Drill',gethot:'Get Hot Routine',gameday:'Game Day Routines',longtoss:'Long Toss',mound:'Mound Progression',pitchcount:'Pitch Count Rules',recovery:'Recovery',youth:'Youth Arm Care',annual:'Annual Planning',throwingorder:'Daily Throwing Order',principles:'Arm Care Principles',readiness:'Arm Readiness Check',tracker:'Volume Tracker',scheduler:'Weekly Builder',install:'Install the App',faq:'FAQ',legal:'Legal and Disclaimer',contact:'Contact',throwbuilder:'Throwing Program Builder',runjump:'Run/Jump Progression Builder',programbuilder:'Custom Program Builder',armscreen:'Arm Care Screen',coaches:'Coaches Tools'};
+var titles = {home:'Home',why:'Why Arm Care Matters',standards:'AAM Standards',redflags:'Red Flags',tspine:'T-Spine Mobility',foamroll:'Foam Roll',stretching:'Static Stretching',dynamic:'Dynamic Warm-Up',prebands:'Pre-Throw Bands',postbands:'Post-Throw Bands',scapular:'Scapular Control',twoout:'2-Out Drill',gethot:'Get Hot Routine',gameday:'Game Day Routines',longtoss:'Long Toss',mound:'Mound Progression',pitchcount:'Pitch Count Rules',recovery:'Recovery',youth:'Youth Arm Care',annual:'Annual Planning',throwingorder:'Daily Throwing Order',principles:'Arm Care Principles',readiness:'Arm Readiness Check',tracker:'Volume Tracker',scheduler:'Weekly Builder',install:'Install the App',faq:'FAQ',legal:'Legal and Disclaimer',contact:'Contact',throwbuilder:'Throwing Program Builder',runjump:'Run/Jump Progression Builder',programbuilder:'Custom Program Builder',armscreen:'Arm Care Screen',coaches:'Coaches Tools',account:'Account'};
 
 function showSection(id) {
   document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
@@ -2362,6 +2430,7 @@ function wbReset() {
 // INIT ON LOGIN
 function initTools() {
   initDate();
+  acctCheckSession();
   renderLog();
   renderReadiness();
   wbRenderTable();
@@ -3804,6 +3873,136 @@ function ctRenderBoard(){
       (suggestion ? '<div class="ct-board-suggestion">' + suggestion + '</div>' : '');
     board.appendChild(row);
   });
+}
+
+// ============================================================
+// ACCOUNT SYSTEM (Supabase Auth - Coach / Parent / Athlete)
+// ============================================================
+var SUPABASE_URL = 'https://ygwsqsthzypikuzughwy.supabase.co';
+var SUPABASE_ANON_KEY = 'sb_publishable_AqjIIQ4-WOcenE7cMcnd9g_nND2CMrR';
+var SB_CDN_URLS = [
+  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
+  'https://unpkg.com/@supabase/supabase-js@2'
+];
+var sbClient = null;
+var sbLoadPromise = null;
+
+function ensureSupabaseLoaded() {
+  if (typeof supabase !== 'undefined') return Promise.resolve(true);
+  if (sbLoadPromise) return sbLoadPromise;
+  sbLoadPromise = (function tryNext(i) {
+    if (i >= SB_CDN_URLS.length) return Promise.resolve(false);
+    return new Promise(function(resolve) {
+      var s = document.createElement('script');
+      s.src = SB_CDN_URLS[i];
+      s.onload = function() { resolve(typeof supabase !== 'undefined'); };
+      s.onerror = function() { resolve(false); };
+      document.head.appendChild(s);
+    }).then(function(ok) { if (ok) return true; return tryNext(i + 1); });
+  })(0);
+  return sbLoadPromise;
+}
+
+function getSb() {
+  if (sbClient) return sbClient;
+  if (typeof supabase === 'undefined') return null;
+  sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  return sbClient;
+}
+
+function acctShowMsg(text, type) {
+  var el = document.getElementById('acct-msg');
+  el.textContent = text;
+  el.className = 'acct-msg ' + type;
+  el.style.display = 'block';
+}
+
+function acctSwitchTab(tab) {
+  document.getElementById('acct-tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('acct-tab-signup').classList.toggle('active', tab === 'signup');
+  document.getElementById('acct-login-form').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('acct-signup-form').style.display = tab === 'signup' ? 'block' : 'none';
+  document.getElementById('acct-msg').style.display = 'none';
+}
+
+async function acctSignUp() {
+  var name = document.getElementById('acct-signup-name').value.trim();
+  var email = document.getElementById('acct-signup-email').value.trim();
+  var password = document.getElementById('acct-signup-password').value;
+  var role = document.getElementById('acct-signup-role').value;
+  if (!name || !email || !password) { acctShowMsg('Fill in your name, email, and password.', 'error'); return; }
+  if (password.length < 6) { acctShowMsg('Password must be at least 6 characters.', 'error'); return; }
+
+  var btn = document.getElementById('acct-signup-btn');
+  btn.disabled = true; btn.textContent = 'Creating account...';
+  var ok = await ensureSupabaseLoaded();
+  var sb = ok ? getSb() : null;
+  btn.disabled = false; btn.textContent = 'Create Account';
+  if (!sb) { acctShowMsg('Could not connect to the account system. Check your internet connection and try again.', 'error'); return; }
+
+  var res = await sb.auth.signUp({
+    email: email,
+    password: password,
+    options: { data: { full_name: name, role: role } }
+  });
+  if (res.error) { acctShowMsg(res.error.message, 'error'); return; }
+  acctShowMsg('Account created! Check your email to confirm, then log in.', 'success');
+  document.getElementById('acct-signup-name').value = '';
+  document.getElementById('acct-signup-email').value = '';
+  document.getElementById('acct-signup-password').value = '';
+  acctSwitchTab('login');
+}
+
+async function acctLogIn() {
+  var email = document.getElementById('acct-login-email').value.trim();
+  var password = document.getElementById('acct-login-password').value;
+  if (!email || !password) { acctShowMsg('Enter your email and password.', 'error'); return; }
+
+  var btn = document.getElementById('acct-login-btn');
+  btn.disabled = true; btn.textContent = 'Logging in...';
+  var ok = await ensureSupabaseLoaded();
+  var sb = ok ? getSb() : null;
+  btn.disabled = false; btn.textContent = 'Log In';
+  if (!sb) { acctShowMsg('Could not connect to the account system. Check your internet connection and try again.', 'error'); return; }
+
+  var res = await sb.auth.signInWithPassword({ email: email, password: password });
+  if (res.error) { acctShowMsg(res.error.message, 'error'); return; }
+  acctRenderLoggedIn(res.data.user);
+}
+
+async function acctLogOut() {
+  var sb = getSb();
+  if (sb) await sb.auth.signOut();
+  document.getElementById('acct-loggedin').style.display = 'none';
+  document.getElementById('acct-loggedout').style.display = 'block';
+  document.getElementById('acct-login-email').value = '';
+  document.getElementById('acct-login-password').value = '';
+  document.getElementById('acct-msg').style.display = 'none';
+  var navItem = document.getElementById('nav-account-item');
+  if (navItem) navItem.textContent = 'Log In / Sign Up';
+}
+
+function acctRenderLoggedIn(user) {
+  var name = (user.user_metadata && user.user_metadata.full_name) || user.email;
+  var role = (user.user_metadata && user.user_metadata.role) || 'unknown';
+  document.getElementById('acct-name-display').textContent = name;
+  document.getElementById('acct-email-display').textContent = user.email;
+  document.getElementById('acct-role-display').textContent = role;
+  document.getElementById('acct-loggedout').style.display = 'none';
+  document.getElementById('acct-loggedin').style.display = 'block';
+  var navItem = document.getElementById('nav-account-item');
+  if (navItem) navItem.textContent = name + ' (' + role + ')';
+}
+
+async function acctCheckSession() {
+  var ok = await ensureSupabaseLoaded();
+  if (!ok) return;
+  var sb = getSb();
+  if (!sb) return;
+  var res = await sb.auth.getSession();
+  if (res.data && res.data.session && res.data.session.user) {
+    acctRenderLoggedIn(res.data.session.user);
+  }
 }
 
 </script>

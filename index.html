@@ -2168,6 +2168,7 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
         <div class="save-msg" id="acct-joincode-msg" style="display:none"></div>
       </div>
       <div id="acct-linked-list" style="margin-top:16px"></div>
+      <div id="acct-weekly-plan-view" style="margin-top:24px"></div>
     </div>
   </div>
 </div>
@@ -4189,9 +4190,22 @@ async function acctLogIn() {
   acctRenderLoggedIn(res.data.user);
 }
 
+function clinRelockAll() {
+  sessionStorage.removeItem('aamClinUnlocked');
+  ['tb', 'rj', 'wb'].forEach(function(prefix) {
+    var gate = document.getElementById(prefix + '-gate');
+    var content = document.getElementById(prefix + '-content');
+    if (gate) gate.style.display = 'block';
+    if (content) content.style.display = 'none';
+  });
+  var codeInputs = document.querySelectorAll('.clin-gate input[type="password"]');
+  codeInputs.forEach(function(inp) { inp.value = ''; });
+}
+
 async function acctLogOut() {
   var sb = getSb();
   if (sb) await sb.auth.signOut();
+  clinRelockAll();
   document.getElementById('acct-loggedin').style.display = 'none';
   document.getElementById('acct-loggedout').style.display = 'block';
   document.getElementById('acct-login-email').value = '';
@@ -4214,6 +4228,8 @@ function acctRenderLoggedIn(user) {
 
   document.getElementById('acct-coach-panel').style.display = role === 'coach' ? 'block' : 'none';
   document.getElementById('acct-joincode-panel').style.display = (role === 'athlete' || role === 'parent') ? 'block' : 'none';
+
+  if (role !== 'coach') clinRelockAll();
 
   if (role === 'coach') acctLoadCoachTeam();
   else if (role === 'athlete' || role === 'parent') acctLoadLinkedAthletes();
@@ -4313,20 +4329,67 @@ async function acctLoadLinkedAthletes() {
   var user = (await sb.auth.getUser()).data.user;
   var role = user.user_metadata && user.user_metadata.role;
   var list = document.getElementById('acct-linked-list');
+  var planView = document.getElementById('acct-weekly-plan-view');
   var res;
   if (role === 'athlete') {
-    res = await sb.from('athletes').select('full_name').eq('athlete_user_id', user.id);
+    res = await sb.from('athletes').select('id, full_name').eq('athlete_user_id', user.id);
   } else {
-    res = await sb.from('athlete_parents').select('athletes(full_name)').eq('parent_user_id', user.id);
+    res = await sb.from('athlete_parents').select('athletes(id, full_name)').eq('parent_user_id', user.id);
   }
   if (res.error || !res.data || !res.data.length) {
     list.innerHTML = '<div style="color:#7A7A85;font-size:13px">Not linked to any athlete yet. Enter your code above.</div>';
+    if (planView) planView.innerHTML = '';
     return;
   }
-  list.innerHTML = res.data.map(function(row) {
-    var n = role === 'athlete' ? row.full_name : (row.athletes && row.athletes.full_name);
-    return '<div class="acct-linked-card">Linked to <strong>' + n + '</strong></div>';
+  var athletes = res.data.map(function(row) {
+    return role === 'athlete' ? row : row.athletes;
+  }).filter(Boolean);
+
+  list.innerHTML = athletes.map(function(a) {
+    return '<div class="acct-linked-card">Linked to <strong>' + a.full_name + '</strong></div>';
   }).join('');
+
+  if (planView) {
+    planView.innerHTML = '';
+    for (var i = 0; i < athletes.length; i++) {
+      await acctRenderWeeklyPlanFor(athletes[i].id, athletes[i].full_name, planView);
+    }
+  }
+}
+
+async function acctRenderWeeklyPlanFor(athleteId, athleteName, container) {
+  var sb = getSb();
+  var res = await sb.from('weekly_plans').select('plan').eq('athlete_id', athleteId).maybeSingle();
+  if (!res.data || !res.data.plan || !res.data.plan.sections) return;
+  var sections = res.data.plan.sections;
+
+  var block = document.createElement('div');
+  block.style.marginBottom = '24px';
+
+  var heading = document.createElement('div');
+  heading.className = 'h2';
+  heading.textContent = athleteName + "'s Full Weekly Program";
+  block.appendChild(heading);
+
+  var wrap = document.createElement('div');
+  wrap.className = 'tb-table-wrap';
+  var html = '<table class="tbl wb-table"><thead><tr>' + wbDays.map(function(d) { return '<th>' + d + '</th>'; }).join('') + '</tr></thead><tbody>';
+  sections.forEach(function(sec) {
+    html += '<tr class="wb-section-row"><td colspan="7">' + sec.name + '</td></tr>';
+    if (sec.freeform) {
+      sec.rows.forEach(function(row) {
+        if (row[0]) html += '<tr><td colspan="7" style="text-align:left">' + row[0] + '</td></tr>';
+      });
+    } else {
+      sec.rows.forEach(function(row) {
+        html += '<tr>' + row.map(function(v) { return '<td>' + (v || '&mdash;') + '</td>'; }).join('') + '</tr>';
+      });
+    }
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+  block.appendChild(wrap);
+  container.appendChild(block);
 }
 
 async function acctCheckSession() {

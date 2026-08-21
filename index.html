@@ -90,6 +90,10 @@
 .acct-team-card-name { font-size: 14px; font-weight: 700; color: #1C1C1E; }
 .acct-team-card-count { font-size: 12px; color: #7A7A85; margin-top: 2px; }
 .acct-team-card-arrow { color: #C9A84C; font-size: 18px; }
+.acct-stats-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.acct-stat { background: #fff; border: 1px solid #E8E4DC; border-radius: 4px; padding: 14px 18px; text-align: center; min-width: 90px; flex: 1; }
+.acct-stat-num { font-size: 22px; font-weight: 700; color: #0F1E35; }
+.acct-stat-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #7A7A85; margin-top: 4px; }
 .acct-linked-card { background: #fff; border: 1px solid #E8E4DC; border-radius: 4px; padding: 12px 14px; margin-bottom: 8px; font-size: 13px; color: #1C1C1E; }
 .acct-code-pill { display: inline-block; background: #FDF8DC; color: #7A6000; font-weight: 700; letter-spacing: 1px; padding: 3px 10px; border-radius: 12px; font-family: monospace; font-size: 13px; }
 .acct-linked-yes { color: #1A6A1A; font-size: 12px; font-weight: 700; }
@@ -2179,6 +2183,13 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
       </div>
     </div>
 
+        <div id="acct-admin-panel" style="display:none">
+      <div class="h2">Platform Overview</div>
+      <div class="acct-stats-row" id="acct-admin-stats"></div>
+      <div class="h2" style="margin-top:20px">All Teams</div>
+      <div id="acct-admin-teams"></div>
+    </div>
+
     <div id="acct-coach-panel" style="display:none">
       <div class="h2">My Teams</div>
 
@@ -2792,9 +2803,11 @@ async function wbPopulateAthleteDropdown() {
   var user = userRes.data.user;
   if (!user) return;
   var role = user.user_metadata && user.user_metadata.role;
-  if (role !== 'coach') return;
+  if (role !== 'coach' && role !== 'admin') return;
 
-  var teamsRes = await sb.from('teams').select('id, name').eq('coach_id', user.id).order('name');
+  var teamsQuery = sb.from('teams').select('id, name');
+  if (role !== 'admin') teamsQuery = teamsQuery.eq('coach_id', user.id);
+  var teamsRes = await teamsQuery.order('name');
   if (!teamsRes.data || !teamsRes.data.length) return;
 
   var athRes = await sb.from('athletes').select('id, full_name, team_id').order('full_name');
@@ -4452,12 +4465,14 @@ function acctRenderLoggedIn(user) {
   var navItem = document.getElementById('nav-account-item');
   if (navItem) navItem.textContent = name + ' (' + role + ')';
 
-  document.getElementById('acct-coach-panel').style.display = role === 'coach' ? 'block' : 'none';
+  document.getElementById('acct-admin-panel').style.display = role === 'admin' ? 'block' : 'none';
+  document.getElementById('acct-coach-panel').style.display = (role === 'coach' || role === 'admin') ? 'block' : 'none';
   document.getElementById('acct-joincode-panel').style.display = (role === 'athlete' || role === 'parent') ? 'block' : 'none';
 
-  if (role !== 'coach') clinRelockAll();
+  if (role !== 'coach' && role !== 'admin') clinRelockAll();
 
-  if (role === 'coach') acctLoadTeamList();
+  if (role === 'admin') acctLoadAdminOverview();
+  if (role === 'coach' || role === 'admin') acctLoadTeamList();
   else if (role === 'athlete' || role === 'parent') acctLoadLinkedAthletes();
 }
 
@@ -4471,6 +4486,50 @@ async function acctCreateTeam() {
   if (res.error) { alert(res.error.message); return; }
   document.getElementById('acct-team-name').value = '';
   acctLoadTeamList();
+}
+
+async function acctLoadAdminOverview() {
+  var sb = getSb();
+  if (!sb) return;
+
+  var profilesRes = await sb.from('profiles').select('id, full_name, role');
+  var teamsRes = await sb.from('teams').select('id, name, coach_id').order('created_at');
+  var athletesRes = await sb.from('athletes').select('id, team_id, athlete_user_id');
+
+  var profiles = profilesRes.data || [];
+  var teams = teamsRes.data || [];
+  var athletes = athletesRes.data || [];
+
+  var profileById = {};
+  profiles.forEach(function(p) { profileById[p.id] = p; });
+
+  var coachCount = profiles.filter(function(p) { return p.role === 'coach'; }).length;
+  var parentCount = profiles.filter(function(p) { return p.role === 'parent'; }).length;
+  var linkedCount = athletes.filter(function(a) { return a.athlete_user_id; }).length;
+
+  var statsEl = document.getElementById('acct-admin-stats');
+  if (statsEl) {
+    statsEl.innerHTML =
+      '<div class="acct-stat"><div class="acct-stat-num">' + teams.length + '</div><div class="acct-stat-label">Teams</div></div>' +
+      '<div class="acct-stat"><div class="acct-stat-num">' + coachCount + '</div><div class="acct-stat-label">Coaches</div></div>' +
+      '<div class="acct-stat"><div class="acct-stat-num">' + athletes.length + '</div><div class="acct-stat-label">Athletes</div></div>' +
+      '<div class="acct-stat"><div class="acct-stat-num">' + parentCount + '</div><div class="acct-stat-label">Parents</div></div>' +
+      '<div class="acct-stat"><div class="acct-stat-num">' + linkedCount + '/' + athletes.length + '</div><div class="acct-stat-label">Linked</div></div>';
+  }
+
+  var athCountByTeam = {};
+  athletes.forEach(function(a) { athCountByTeam[a.team_id] = (athCountByTeam[a.team_id] || 0) + 1; });
+
+  var teamsEl = document.getElementById('acct-admin-teams');
+  if (teamsEl) {
+    teamsEl.innerHTML = teams.map(function(t) {
+      var coach = profileById[t.coach_id];
+      var coachName = coach ? coach.full_name : 'Unknown coach';
+      var n = athCountByTeam[t.id] || 0;
+      return '<div class="acct-team-card" style="cursor:default"><div><div class="acct-team-card-name">' + t.name + '</div>' +
+        '<div class="acct-team-card-count">Coach: ' + coachName + ' &middot; ' + n + ' athlete' + (n === 1 ? '' : 's') + '</div></div></div>';
+    }).join('') || '<div style="color:#7A7A85;font-size:13px">No teams on the platform yet.</div>';
+  }
 }
 
 async function acctLoadTeamList() {

@@ -85,6 +85,10 @@
 .acct-msg.success { background: rgba(76,128,98,0.15); color: #7ADB9E; }
 .acct-loggedin-card { background: #1A2F4E; border-radius: 6px; padding: 30px; max-width: 380px; margin: 10px auto; text-align: center; }
 .acct-role-badge { display: inline-block; background: #C9A84C; color: #0F1E35; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 4px 12px; border-radius: 12px; margin-top: 8px; }
+.acct-linked-card { background: #fff; border: 1px solid #E8E4DC; border-radius: 4px; padding: 12px 14px; margin-bottom: 8px; font-size: 13px; color: #1C1C1E; }
+.acct-code-pill { display: inline-block; background: #FDF8DC; color: #7A6000; font-weight: 700; letter-spacing: 1px; padding: 3px 10px; border-radius: 12px; font-family: monospace; font-size: 13px; }
+.acct-linked-yes { color: #1A6A1A; font-size: 12px; font-weight: 700; }
+.acct-linked-no { color: #7A7A85; font-size: 12px; }
 body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
 #gate { position: fixed; inset: 0; background: #0F1E35; display: flex; align-items: center; justify-content: center; z-index: 999; }
 .gate-box { background: #1A2F4E; border-top: 4px solid #C9A84C; padding: 40px; width: min(400px, 90vw); text-align: center; border-radius: 4px; }
@@ -2079,6 +2083,43 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
         <button class="gate-btn" onclick="acctLogOut()" style="background:#2A4568">Log Out</button>
       </div>
     </div>
+
+    <div id="acct-coach-panel" style="display:none">
+      <div class="h2">My Roster</div>
+
+      <div id="acct-team-setup">
+        <div class="tool-form">
+          <div class="form-row"><label class="form-label">Team Name</label><input type="text" class="form-input" id="acct-team-name" placeholder="e.g. Marek 14U Black"></div>
+          <button class="btn-primary" onclick="acctCreateTeam()">Create Team</button>
+        </div>
+      </div>
+
+      <div id="acct-roster-view" style="display:none">
+        <div style="color:#7A7A85;font-size:13px;margin-bottom:14px" id="acct-team-name-display"></div>
+        <div class="tb-table-wrap">
+          <table class="tbl clin-table" id="acct-roster-table">
+            <thead><tr><th>Athlete</th><th style="width:110px">Join Code</th><th style="width:90px">Linked?</th><th style="width:40px"></th></tr></thead>
+            <tbody id="acct-roster-body"></tbody>
+          </table>
+        </div>
+        <div class="tool-form" style="margin-top:16px">
+          <div class="form-row-2">
+            <div><label class="form-label">Add Athlete</label><input type="text" class="form-input" id="acct-new-athlete-name" placeholder="Athlete full name"></div>
+            <div style="display:flex;align-items:flex-end"><button class="btn-primary" onclick="acctAddAthlete()" style="width:100%">+ Add Athlete</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="acct-joincode-panel" style="display:none">
+      <div class="h2">Join Your Team</div>
+      <div class="tool-form">
+        <div class="form-row"><label class="form-label">Join Code</label><input type="text" class="form-input" id="acct-joincode-input" placeholder="6-character code from your coach"></div>
+        <button class="btn-primary" onclick="acctClaimCode()">Link My Account</button>
+        <div class="save-msg" id="acct-joincode-msg" style="display:none"></div>
+      </div>
+      <div id="acct-linked-list" style="margin-top:16px"></div>
+    </div>
   </div>
 </div>
 
@@ -3992,6 +4033,122 @@ function acctRenderLoggedIn(user) {
   document.getElementById('acct-loggedin').style.display = 'block';
   var navItem = document.getElementById('nav-account-item');
   if (navItem) navItem.textContent = name + ' (' + role + ')';
+
+  document.getElementById('acct-coach-panel').style.display = role === 'coach' ? 'block' : 'none';
+  document.getElementById('acct-joincode-panel').style.display = (role === 'athlete' || role === 'parent') ? 'block' : 'none';
+
+  if (role === 'coach') acctLoadCoachTeam();
+  else if (role === 'athlete' || role === 'parent') acctLoadLinkedAthletes();
+}
+
+async function acctCreateTeam() {
+  var name = document.getElementById('acct-team-name').value.trim();
+  if (!name) { alert('Enter a team name.'); return; }
+  var sb = getSb();
+  if (!sb) return;
+  var user = (await sb.auth.getUser()).data.user;
+  var res = await sb.from('teams').insert({ coach_id: user.id, name: name }).select().single();
+  if (res.error) { alert(res.error.message); return; }
+  acctLoadCoachTeam();
+}
+
+async function acctLoadCoachTeam() {
+  var sb = getSb();
+  if (!sb) return;
+  var user = (await sb.auth.getUser()).data.user;
+  var teamRes = await sb.from('teams').select('*').eq('coach_id', user.id).limit(1).maybeSingle();
+  if (teamRes.error || !teamRes.data) {
+    document.getElementById('acct-team-setup').style.display = 'block';
+    document.getElementById('acct-roster-view').style.display = 'none';
+    return;
+  }
+  document.getElementById('acct-team-setup').style.display = 'none';
+  document.getElementById('acct-roster-view').style.display = 'block';
+  document.getElementById('acct-team-name-display').textContent = teamRes.data.name;
+  window._acctTeamId = teamRes.data.id;
+  acctLoadRoster(teamRes.data.id);
+}
+
+async function acctLoadRoster(teamId) {
+  var sb = getSb();
+  var res = await sb.from('athletes').select('*').eq('team_id', teamId).order('created_at');
+  var body = document.getElementById('acct-roster-body');
+  body.innerHTML = '';
+  if (res.error || !res.data.length) {
+    body.innerHTML = '<tr><td colspan="4" style="color:#7A7A85;padding:14px">No athletes added yet.</td></tr>';
+    return;
+  }
+  res.data.forEach(function(a) {
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td>' + a.full_name + '</td>' +
+      '<td><span class="acct-code-pill">' + a.join_code + '</span></td>' +
+      '<td>' + (a.athlete_user_id ? '<span class="acct-linked-yes">Linked</span>' : '<span class="acct-linked-no">Not yet</span>') + '</td>' +
+      '<td><button class="tb-del" onclick="acctRemoveAthlete(\'' + a.id + '\')">&times;</button></td>';
+    body.appendChild(tr);
+  });
+}
+
+async function acctAddAthlete() {
+  var name = document.getElementById('acct-new-athlete-name').value.trim();
+  if (!name) return;
+  if (!window._acctTeamId) return;
+  var sb = getSb();
+  var res = await sb.from('athletes').insert({ team_id: window._acctTeamId, full_name: name }).select().single();
+  if (res.error) { alert(res.error.message); return; }
+  document.getElementById('acct-new-athlete-name').value = '';
+  acctLoadRoster(window._acctTeamId);
+}
+
+async function acctRemoveAthlete(id) {
+  if (!confirm('Remove this athlete from your roster?')) return;
+  var sb = getSb();
+  await sb.from('athletes').delete().eq('id', id);
+  acctLoadRoster(window._acctTeamId);
+}
+
+async function acctClaimCode() {
+  var code = document.getElementById('acct-joincode-input').value.trim().toLowerCase();
+  var msg = document.getElementById('acct-joincode-msg');
+  if (!code) return;
+  var sb = getSb();
+  var user = (await sb.auth.getUser()).data.user;
+  var role = user.user_metadata && user.user_metadata.role;
+  var fn = role === 'athlete' ? 'claim_athlete_as_self' : 'claim_athlete_as_parent';
+  var res = await sb.rpc(fn, { code: code });
+  msg.style.display = 'block';
+  if (res.error || (res.data && res.data.indexOf('error') === 0)) {
+    msg.className = 'save-msg';
+    msg.style.color = '#C8402A';
+    msg.textContent = res.error ? res.error.message : res.data;
+  } else {
+    msg.style.color = '';
+    msg.textContent = 'Linked successfully!';
+    document.getElementById('acct-joincode-input').value = '';
+    acctLoadLinkedAthletes();
+  }
+  setTimeout(function() { msg.style.display = 'none'; }, 4000);
+}
+
+async function acctLoadLinkedAthletes() {
+  var sb = getSb();
+  var user = (await sb.auth.getUser()).data.user;
+  var role = user.user_metadata && user.user_metadata.role;
+  var list = document.getElementById('acct-linked-list');
+  var res;
+  if (role === 'athlete') {
+    res = await sb.from('athletes').select('full_name').eq('athlete_user_id', user.id);
+  } else {
+    res = await sb.from('athlete_parents').select('athletes(full_name)').eq('parent_user_id', user.id);
+  }
+  if (res.error || !res.data || !res.data.length) {
+    list.innerHTML = '<div style="color:#7A7A85;font-size:13px">Not linked to any athlete yet. Enter your code above.</div>';
+    return;
+  }
+  list.innerHTML = res.data.map(function(row) {
+    var n = role === 'athlete' ? row.full_name : (row.athletes && row.athletes.full_name);
+    return '<div class="acct-linked-card">Linked to <strong>' + n + '</strong></div>';
+  }).join('');
 }
 
 async function acctCheckSession() {

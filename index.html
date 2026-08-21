@@ -4499,7 +4499,8 @@ async function acctLoadTeamList() {
 
   listEl.innerHTML = teamsRes.data.map(function(t) {
     var n = counts[t.id] || 0;
-    return '<div class="acct-team-card" onclick="acctSelectTeam(\'' + t.id + '\', ' + JSON.stringify(t.name) + ')">' +
+    var safeName = String(t.name).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    return '<div class="acct-team-card" onclick="acctSelectTeam(\'' + t.id + '\', \'' + safeName + '\')">' +
       '<div><div class="acct-team-card-name">' + t.name + '</div><div class="acct-team-card-count">' + n + ' athlete' + (n === 1 ? '' : 's') + '</div></div>' +
       '<div class="acct-team-card-arrow">&rsaquo;</div></div>';
   }).join('');

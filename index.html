@@ -485,6 +485,10 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
     <div id="gate-login-form">
       <div class="acct-field" style="text-align:left"><label>Email</label><input type="email" id="gate-login-email" autocomplete="email"></div>
       <div class="acct-field" style="text-align:left"><label>Password</label><input type="password" id="gate-login-password" autocomplete="current-password"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin:2px 0 16px;text-align:left">
+        <input type="checkbox" id="gate-login-remember" checked style="width:16px;height:16px;accent-color:#C9A84C">
+        <label for="gate-login-remember" style="font-size:12px;color:#8A9BB0;margin:0;font-weight:400;text-transform:none;letter-spacing:normal">Remember me on this device</label>
+      </div>
       <button class="gate-btn" id="gate-login-btn" onclick="gateLogIn()">Log In</button>
       <div style="text-align:right;margin-top:10px"><a href="#" style="font-size:12px;color:#8A9BB0" onclick="gateShowReset();return false;">Forgot password?</a></div>
     </div>
@@ -502,6 +506,10 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
         </select>
       </div>
       <div class="acct-field" style="text-align:left"><label>Invite Code</label><input type="text" id="gate-signup-invite" placeholder="Provided by AAM" autocomplete="off"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin:2px 0 16px;text-align:left">
+        <input type="checkbox" id="gate-signup-remember" checked style="width:16px;height:16px;accent-color:#C9A84C">
+        <label for="gate-signup-remember" style="font-size:12px;color:#8A9BB0;margin:0;font-weight:400;text-transform:none;letter-spacing:normal">Remember me on this device</label>
+      </div>
       <button class="gate-btn" id="gate-signup-btn" onclick="gateSignUp()">Create Account</button>
     </div>
 
@@ -2354,10 +2362,13 @@ async function gateSetNewPassword() {
 async function gateLogIn() {
   var email = document.getElementById('gate-login-email').value.trim();
   var password = document.getElementById('gate-login-password').value;
+  var remember = document.getElementById('gate-login-remember').checked;
   var err = document.getElementById('gateErr');
   err.style.color = '';
   err.textContent = '';
   if (!email || !password) { err.textContent = 'Enter your email and password.'; return; }
+
+  acctSetRememberPref(remember);
 
   var btn = document.getElementById('gate-login-btn');
   btn.disabled = true; btn.textContent = 'Logging in...';
@@ -2384,6 +2395,9 @@ async function gateSignUp() {
   if (!name || !email || !password) { err.textContent = 'Fill in your name, email, and password.'; return; }
   if (password.length < 6) { err.textContent = 'Password must be at least 6 characters.'; return; }
   if (!invite) { err.textContent = 'Enter your invite code.'; return; }
+
+  var remember = document.getElementById('gate-signup-remember').checked;
+  acctSetRememberPref(remember);
 
   var btn = document.getElementById('gate-signup-btn');
   btn.disabled = true; btn.textContent = 'Checking invite code...';
@@ -4358,8 +4372,18 @@ function ensureSupabaseLoaded() {
 function getSb() {
   if (sbClient) return sbClient;
   if (typeof supabase === 'undefined') return null;
-  sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  var remember = localStorage.getItem('aamRememberPref') !== 'no';
+  sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { storage: remember ? window.localStorage : window.sessionStorage, persistSession: true, autoRefreshToken: true }
+  });
   return sbClient;
+}
+
+function acctSetRememberPref(remember) {
+  var current = localStorage.getItem('aamRememberPref') !== 'no';
+  if (current === remember) return;
+  localStorage.setItem('aamRememberPref', remember ? 'yes' : 'no');
+  sbClient = null; // force recreation with the correct storage adapter on next getSb() call
 }
 
 function acctShowMsg(text, type) {
@@ -4430,7 +4454,15 @@ function clinRelockAll() {
     if (gate) gate.style.display = 'block';
     if (content) content.style.display = 'none';
   });
-  var codeInputs = document.querySelectorAll('.clin-gate input[type="password"]');
+  var pbGate = document.getElementById('progbuilder-gate');
+  var pbForm = document.getElementById('progbuilder-form');
+  if (pbGate) pbGate.style.display = 'block';
+  if (pbForm) pbForm.style.display = 'none';
+  var asGate = document.getElementById('armscreen-gate');
+  var asForm = document.getElementById('armscreen-form');
+  if (asGate) asGate.style.display = 'block';
+  if (asForm) asForm.style.display = 'none';
+  var codeInputs = document.querySelectorAll('.clin-gate input[type="password"], #progbuilder-code, #armscreen-code');
   codeInputs.forEach(function(inp) { inp.value = ''; });
 }
 
@@ -4470,6 +4502,15 @@ function acctRenderLoggedIn(user) {
   document.getElementById('acct-joincode-panel').style.display = (role === 'athlete' || role === 'parent') ? 'block' : 'none';
 
   if (role !== 'coach' && role !== 'admin') clinRelockAll();
+  if (role === 'admin') {
+    clinUnlockAll();
+    var pbGate = document.getElementById('progbuilder-gate');
+    var pbForm = document.getElementById('progbuilder-form');
+    if (pbGate && pbForm) { pbGate.style.display = 'none'; pbForm.style.display = 'block'; document.getElementById('pb-date').value = new Date().toISOString().split('T')[0]; renderExLib(); }
+    var asGate = document.getElementById('armscreen-gate');
+    var asForm = document.getElementById('armscreen-form');
+    if (asGate && asForm) { asGate.style.display = 'none'; asForm.style.display = 'block'; document.getElementById('as-date').value = new Date().toISOString().split('T')[0]; setupArcCalc(); }
+  }
 
   if (role === 'admin') acctLoadAdminOverview();
   if (role === 'coach' || role === 'admin') acctLoadTeamList();

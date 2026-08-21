@@ -477,6 +477,7 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
       <div class="acct-field" style="text-align:left"><label>Email</label><input type="email" id="gate-login-email" autocomplete="email"></div>
       <div class="acct-field" style="text-align:left"><label>Password</label><input type="password" id="gate-login-password" autocomplete="current-password"></div>
       <button class="gate-btn" id="gate-login-btn" onclick="gateLogIn()">Log In</button>
+      <div style="text-align:right;margin-top:10px"><a href="#" style="font-size:12px;color:#8A9BB0" onclick="gateShowReset();return false;">Forgot password?</a></div>
     </div>
 
     <div id="gate-signup-form" style="display:none">
@@ -495,7 +496,21 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
       <button class="gate-btn" id="gate-signup-btn" onclick="gateSignUp()">Create Account</button>
     </div>
 
+    <div id="gate-reset-form" style="display:none">
+      <div class="clin-gate-sub" style="margin-bottom:16px">Enter your email and we'll send a link to reset your password.</div>
+      <div class="acct-field" style="text-align:left"><label>Email</label><input type="email" id="gate-reset-email" autocomplete="email"></div>
+      <button class="gate-btn" id="gate-reset-btn" onclick="gateSendReset()">Send Reset Link</button>
+      <div style="text-align:center;margin-top:10px"><a href="#" style="font-size:12px;color:#8A9BB0" onclick="gateSwitchTab('login');return false;">Back to Log In</a></div>
+    </div>
+
+    <div id="gate-newpw-form" style="display:none">
+      <div class="gate-title" style="font-size:18px;margin-bottom:10px">Set a New Password</div>
+      <div class="acct-field" style="text-align:left"><label>New Password</label><input type="password" id="gate-newpw-input" autocomplete="new-password"></div>
+      <button class="gate-btn" id="gate-newpw-btn" onclick="gateSetNewPassword()">Save New Password</button>
+    </div>
+
     <div class="gate-err" id="gateErr"></div>
+
     <div class="gate-footer">2025 Advanced Athletic Medicine · Throwers Mafia · Individual Use Only</div>
   </div>
 </div>
@@ -2163,6 +2178,16 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
       <div class="h2">My Roster</div>
 
       <div id="acct-team-setup">
+        <div class="tool-form" style="background:#FDF8DC;border-left:4px solid #C9A84C">
+          <strong style="color:#7A6000;font-size:13px;letter-spacing:0.5px">GETTING STARTED</strong>
+          <ol style="margin:10px 0 0 18px;padding:0;font-size:13px;line-height:1.9;color:#4A4A52">
+            <li>Create your team below</li>
+            <li>Add each athlete by name &mdash; you'll get a 6-character join code for each one</li>
+            <li>Text or email that code to the athlete or their parent</li>
+            <li>They sign up (choosing Athlete or Parent) and enter the code to link their account</li>
+            <li>Build their weekly program in the Clinical tools &mdash; it shows up on their phone automatically</li>
+          </ol>
+        </div>
         <div class="tool-form">
           <div class="form-row"><label class="form-label">Team Name</label><input type="text" class="form-input" id="acct-team-name" placeholder="e.g. Marek 14U Black"></div>
           <button class="btn-primary" onclick="acctCreateTeam()">Create Team</button>
@@ -2171,6 +2196,7 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
 
       <div id="acct-roster-view" style="display:none">
         <div style="color:#7A7A85;font-size:13px;margin-bottom:14px" id="acct-team-name-display"></div>
+        <div class="tb-privacy-note" style="margin-bottom:14px"><strong>Tip:</strong> share each athlete's join code with them or their parent so they can link their account and see their program.</div>
         <div class="tb-table-wrap">
           <table class="tbl clin-table" id="acct-roster-table">
             <thead><tr><th>Athlete</th><th style="width:110px">Join Code</th><th style="width:90px">Linked?</th><th style="width:40px"></th></tr></thead>
@@ -2221,8 +2247,6 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
 </div>
 
 <script>
-var GATE_INVITE_CODE = 'AAM2026'; // required only at sign-up; change any time without affecting existing accounts
-
 function gateUnlockApp() {
   document.getElementById('gate').style.display = 'none';
   document.getElementById('app').style.display = 'block';
@@ -2234,9 +2258,74 @@ function gateSwitchTab(tab) {
   document.getElementById('gate-tab-signup').classList.toggle('active', tab === 'signup');
   document.getElementById('gate-login-form').style.display = tab === 'login' ? 'block' : 'none';
   document.getElementById('gate-signup-form').style.display = tab === 'signup' ? 'block' : 'none';
+  document.getElementById('gate-reset-form').style.display = 'none';
   var err = document.getElementById('gateErr');
   err.textContent = '';
   err.style.color = '';
+}
+
+function gateShowReset() {
+  document.getElementById('gate-login-form').style.display = 'none';
+  document.getElementById('gate-signup-form').style.display = 'none';
+  document.getElementById('gate-reset-form').style.display = 'block';
+  var err = document.getElementById('gateErr');
+  err.textContent = '';
+  err.style.color = '';
+}
+
+async function gateSendReset() {
+  var email = document.getElementById('gate-reset-email').value.trim();
+  var err = document.getElementById('gateErr');
+  err.style.color = '';
+  err.textContent = '';
+  if (!email) { err.textContent = 'Enter your email address.'; return; }
+
+  var btn = document.getElementById('gate-reset-btn');
+  btn.disabled = true; btn.textContent = 'Sending...';
+  var ok = await ensureSupabaseLoaded();
+  var sb = ok ? getSb() : null;
+  btn.disabled = false; btn.textContent = 'Send Reset Link';
+  if (!sb) { err.textContent = 'Could not connect. Check your internet connection and try again.'; return; }
+
+  var res = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + window.location.pathname });
+  if (res.error) { err.textContent = res.error.message; return; }
+  err.style.color = '#7ADB9E';
+  err.textContent = 'Check your email for a reset link.';
+}
+
+function gateShowRecoveryMode() {
+  document.getElementById('gate').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.querySelector('#gate .acct-tabs').style.display = 'none';
+  document.getElementById('gate-login-form').style.display = 'none';
+  document.getElementById('gate-signup-form').style.display = 'none';
+  document.getElementById('gate-reset-form').style.display = 'none';
+  document.getElementById('gate-newpw-form').style.display = 'block';
+}
+
+async function gateSetNewPassword() {
+  var pw = document.getElementById('gate-newpw-input').value;
+  var err = document.getElementById('gateErr');
+  err.style.color = '';
+  err.textContent = '';
+  if (!pw || pw.length < 6) { err.textContent = 'Password must be at least 6 characters.'; return; }
+
+  var btn = document.getElementById('gate-newpw-btn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  var sb = getSb();
+  if (!sb) { btn.disabled = false; btn.textContent = 'Save New Password'; err.textContent = 'Not connected. Try again.'; return; }
+
+  var res = await sb.auth.updateUser({ password: pw });
+  btn.disabled = false; btn.textContent = 'Save New Password';
+  if (res.error) { err.textContent = res.error.message; return; }
+
+  err.style.color = '#7ADB9E';
+  err.textContent = 'Password updated! Loading your account...';
+  setTimeout(function() {
+    document.querySelector('#gate .acct-tabs').style.display = 'flex';
+    document.getElementById('gate-newpw-form').style.display = 'none';
+    gateUnlockApp();
+  }, 1200);
 }
 
 async function gateLogIn() {
@@ -2271,20 +2360,29 @@ async function gateSignUp() {
 
   if (!name || !email || !password) { err.textContent = 'Fill in your name, email, and password.'; return; }
   if (password.length < 6) { err.textContent = 'Password must be at least 6 characters.'; return; }
-  if (invite !== GATE_INVITE_CODE) { err.textContent = 'Invalid invite code. Check with AAM staff for the current code.'; return; }
+  if (!invite) { err.textContent = 'Enter your invite code.'; return; }
 
   var btn = document.getElementById('gate-signup-btn');
-  btn.disabled = true; btn.textContent = 'Creating account...';
+  btn.disabled = true; btn.textContent = 'Checking invite code...';
   var ok = await ensureSupabaseLoaded();
   var sb = ok ? getSb() : null;
-  btn.disabled = false; btn.textContent = 'Create Account';
-  if (!sb) { err.textContent = 'Could not connect. Check your internet connection and try again.'; return; }
+  if (!sb) { btn.disabled = false; btn.textContent = 'Create Account'; err.textContent = 'Could not connect. Check your internet connection and try again.'; return; }
 
+  var codeRes = await sb.from('invite_codes').select('active').eq('code', invite).maybeSingle();
+  if (!codeRes.data || !codeRes.data.active) {
+    btn.disabled = false; btn.textContent = 'Create Account';
+    err.textContent = 'Invalid invite code. Check with your coach or AAM staff for the current code.';
+    return;
+  }
+
+  btn.textContent = 'Creating account...';
   var res = await sb.auth.signUp({ email: email, password: password, options: { data: { full_name: name, role: role } } });
+  btn.disabled = false; btn.textContent = 'Create Account';
   if (res.error) { err.textContent = res.error.message; return; }
 
   if (res.data.session) {
     gateUnlockApp();
+
   } else {
     err.style.color = '#7ADB9E';
     err.textContent = 'Account created! Check your email to confirm, then log in.';
@@ -2298,6 +2396,11 @@ async function gateSignUp() {
   if (!ok) return;
   var sb = getSb();
   if (!sb) return;
+
+  sb.auth.onAuthStateChange(function(event) {
+    if (event === 'PASSWORD_RECOVERY') gateShowRecoveryMode();
+  });
+
   var res = await sb.auth.getSession();
   if (res.data && res.data.session && res.data.session.user) {
     gateUnlockApp();

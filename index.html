@@ -113,6 +113,12 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
 #sidebar { width: 240px; background: #0F1E35; flex-shrink: 0; overflow-y: auto; }
 .nav-section { padding: 12px 0 4px; }
 .nav-label { color: #2A4A6A; font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 0 16px; margin-bottom: 4px; }
+.nav-label.toggleable { cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; margin-bottom: 0; user-select: none; }
+.nav-label.toggleable:hover { color: #C9A84C; }
+.nav-chevron { display: inline-block; font-size: 10px; transition: transform 0.2s ease; }
+.nav-label.toggleable.open .nav-chevron { transform: rotate(90deg); }
+.nav-group-items { max-height: 0; overflow: hidden; transition: max-height 0.25s ease; }
+.nav-group-items.open { max-height: 600px; }
 .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px 16px; color: #7A9AB5; font-size: 13px; cursor: pointer; border-left: 3px solid transparent; }
 .nav-item:hover { color: #fff; background: rgba(255,255,255,0.05); }
 .nav-item.active { color: #C9A84C; border-left-color: #C9A84C; background: rgba(201,168,76,0.08); }
@@ -544,12 +550,17 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
       <div class="nav-section"><div class="nav-label">Account</div>
         <div class="nav-item" id="nav-account-item" onclick="showSection('account')">Log In / Sign Up</div>
       </div>
-      <div class="nav-section"><div class="nav-label">Foundation</div>
+      <div class="nav-section">
+        <div class="nav-label toggleable" onclick="toggleNavGroup('foundation')">Foundation<span class="nav-chevron">&#9656;</span></div>
+        <div class="nav-group-items" id="navgrp-foundation">
         <div class="nav-item" onclick="showSection('why')">Why Arm Care Matters</div>
         <div class="nav-item" onclick="showSection('standards')">AAM Standards</div>
         <div class="nav-item" onclick="showSection('redflags')">Red Flags</div>
+        </div>
       </div>
-      <div class="nav-section"><div class="nav-label">Exercise Library</div>
+      <div class="nav-section">
+        <div class="nav-label toggleable" onclick="toggleNavGroup('exlib')">Exercise Library<span class="nav-chevron">&#9656;</span></div>
+        <div class="nav-group-items" id="navgrp-exlib">
         <div class="nav-item" onclick="showSection('tspine')">T-Spine Mobility</div>
         <div class="nav-item" onclick="showSection('foamroll')">Foam Roll</div>
         <div class="nav-item" onclick="showSection('stretching')">Static Stretching</div>
@@ -558,40 +569,59 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
         <div class="nav-item" onclick="showSection('postbands')">Post-Throw Bands</div>
         <div class="nav-item" onclick="showSection('scapular')">Scapular Control</div>
         <div class="nav-item" onclick="showSection('twoout')">2-Out Drill</div>
+        </div>
       </div>
-      <div class="nav-section"><div class="nav-label">Tools</div>
+      <div class="nav-section">
+        <div class="nav-label toggleable" onclick="toggleNavGroup('tools')">Tools<span class="nav-chevron">&#9656;</span></div>
+        <div class="nav-group-items" id="navgrp-tools">
         <div class="nav-item" onclick="showSection('readiness')">Arm Readiness Check</div>
         <div class="nav-item" onclick="showSection('tracker')">Volume Tracker</div>
-        <div class="nav-item" onclick="showSection('scheduler')">Weekly Builder</div>
+        </div>
       </div>
-      <div class="nav-section"><div class="nav-label">Programs</div>
+      <div class="nav-section">
+        <div class="nav-label toggleable" onclick="toggleNavGroup('programs')">Programs<span class="nav-chevron">&#9656;</span></div>
+        <div class="nav-group-items" id="navgrp-programs">
         <div class="nav-item" onclick="showSection('throwingorder')">Daily Throwing Order</div>
         <div class="nav-item" onclick="showSection('principles')">Arm Care Principles</div>
         <div class="nav-item" onclick="showSection('gethot')">Get Hot Routine</div>
         <div class="nav-item" onclick="showSection('gameday')">Game Day Routines</div>
         <div class="nav-item" onclick="showSection('longtoss')">Long Toss</div>
         <div class="nav-item" onclick="showSection('mound')">Mound Progression</div>
+        </div>
       </div>
-      <div class="nav-section"><div class="nav-label">Guidelines</div>
+      <div class="nav-section">
+        <div class="nav-label toggleable" onclick="toggleNavGroup('guidelines')">Guidelines<span class="nav-chevron">&#9656;</span></div>
+        <div class="nav-group-items" id="navgrp-guidelines">
         <div class="nav-item" onclick="showSection('pitchcount')">Pitch Count Rules</div>
         <div class="nav-item" onclick="showSection('recovery')">Recovery</div>
         <div class="nav-item" onclick="showSection('youth')">Youth Arm Care</div>
         <div class="nav-item" onclick="showSection('annual')">Annual Planning</div>
+        </div>
       </div>
-      <div class="nav-section"><div class="nav-label">Coaches Tools</div>
+      <div class="nav-section">
+        <div class="nav-label toggleable" onclick="toggleNavGroup('coaches')">Coaches Tools<span class="nav-chevron">&#9656;</span></div>
+        <div class="nav-group-items" id="navgrp-coaches">
         <div class="nav-item" onclick="showSection('coaches')">Throw Exposure Board</div>
+        </div>
       </div>
-      <div class="nav-section"><div class="nav-label">Clinical (Staff Only)</div>
+      <div class="nav-section">
+        <div class="nav-label toggleable" onclick="toggleNavGroup('clinical')">Clinical (Staff Only)<span class="nav-chevron">&#9656;</span></div>
+        <div class="nav-group-items" id="navgrp-clinical">
         <div class="nav-item" onclick="showSection('throwbuilder')">Throwing Program Builder</div>
         <div class="nav-item" onclick="showSection('runjump')">Run/Jump Progression Builder</div>
         <div class="nav-item" onclick="showSection('armscreen')">Arm Care Screen</div>
         <div class="nav-item" onclick="showSection('programbuilder')">Custom Program Builder</div>
+        <div class="nav-item" onclick="showSection('scheduler')">Weekly Builder</div>
+        </div>
       </div>
-      <div class="nav-section"><div class="nav-label">Reference</div>
+      <div class="nav-section">
+        <div class="nav-label toggleable" onclick="toggleNavGroup('reference')">Reference<span class="nav-chevron">&#9656;</span></div>
+        <div class="nav-group-items" id="navgrp-reference">
         <div class="nav-item" onclick="showSection('install')">Install the App</div>
         <div class="nav-item" onclick="showSection('faq')">FAQ</div>
         <div class="nav-item" onclick="showSection('legal')">Legal and Disclaimer</div>
         <div class="nav-item" onclick="showSection('contact')">Contact</div>
+        </div>
       </div>
     </div>
     <div class="content" id="contentArea">
@@ -698,7 +728,6 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
         <div class="home-grid">
           <div class="home-card" onclick="showSection('readiness')"><div class="icon">&#128221;</div><div class="name">Arm Readiness Check</div><div class="desc">Post-throw check-in and history</div><div class="tag">Tool</div></div>
           <div class="home-card" onclick="showSection('tracker')"><div class="icon">&#128202;</div><div class="name">Volume Tracker</div><div class="desc">Log sessions and weekly totals</div><div class="tag">Tool</div></div>
-          <div class="home-card" onclick="showSection('scheduler')"><div class="icon">&#128197;</div><div class="name">Weekly Builder</div><div class="desc">Build your custom weekly schedule</div><div class="tag">Tool</div></div>
         </div>
         <div style="height:40px"></div>
       </div>
@@ -1392,16 +1421,29 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
   <div id="session-log"><div style="color:#7A7A85;font-size:14px;padding:16px 0">No sessions logged yet.</div></div>
 </div>
       <div class="section" id="sec-scheduler">
-  <div class="sec-eyebrow">Tools</div>
+  <div class="sec-eyebrow">Clinical Tool - Staff Only</div>
   <h1 class="sec-title">Weekly Arm Care Builder</h1>
   <div class="sec-sub">Matches the AAM Arm Care Throwing and Recovery Schedule format &mdash; tap any cell to edit</div>
   <div class="gold-bar"></div>
-  <div class="tb-table-wrap" id="wb-table-wrap"></div>
-  <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
-    <button class="btn-primary" onclick="wbSave()">Save My Schedule</button>
-    <button class="btn-secondary" onclick="wbReset()">Reset to AAM Template</button>
+
+  <div id="wb-gate">
+    <div class="clin-gate">
+      <div class="clin-gate-lbl">Staff Access</div>
+      <div class="clin-gate-sub">This tool is for AAM clinical staff. Enter the staff code to continue.</div>
+      <input type="password" id="wb-code-input" placeholder="STAFF CODE" autocomplete="off">
+      <button class="gate-btn" onclick="checkClinCode('wb')">Unlock</button>
+      <div class="clin-err" id="wb-code-err"></div>
+    </div>
   </div>
-  <div class="save-msg" id="sched-msg">Schedule saved</div>
+
+  <div id="wb-content" style="display:none">
+    <div class="tb-table-wrap" id="wb-table-wrap"></div>
+    <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+      <button class="btn-primary" onclick="wbSave()">Save My Schedule</button>
+      <button class="btn-secondary" onclick="wbReset()">Reset to AAM Template</button>
+    </div>
+    <div class="save-msg" id="sched-msg">Schedule saved</div>
+  </div>
 </div>
 
       <!-- INSTALL -->
@@ -2174,7 +2216,34 @@ function showSection(id) {
   document.getElementById('contentArea').style.padding = id === 'home' ? '0' : '32px 36px';
   window.scrollTo(0, 0);
   document.getElementById('sidebar').classList.remove('open');
+  expandGroupForActiveItem();
 }
+
+function toggleNavGroup(key) {
+  var group = document.getElementById('navgrp-' + key);
+  if (!group) return;
+  var wasOpen = group.classList.contains('open');
+  document.querySelectorAll('.nav-group-items').forEach(function(g) { g.classList.remove('open'); });
+  document.querySelectorAll('.nav-label.toggleable').forEach(function(l) { l.classList.remove('open'); });
+  if (!wasOpen) {
+    group.classList.add('open');
+    var label = group.previousElementSibling;
+    if (label && label.classList.contains('nav-label')) label.classList.add('open');
+  }
+}
+
+function expandGroupForActiveItem() {
+  var activeItem = document.querySelector('.nav-item.active');
+  if (!activeItem) return;
+  var group = activeItem.closest('.nav-group-items');
+  if (!group) return; // Home/Account items aren't in a collapsible group
+  document.querySelectorAll('.nav-group-items').forEach(function(g) { g.classList.remove('open'); });
+  document.querySelectorAll('.nav-label.toggleable').forEach(function(l) { l.classList.remove('open'); });
+  group.classList.add('open');
+  var label = group.previousElementSibling;
+  if (label && label.classList.contains('nav-label')) label.classList.add('open');
+}
+
 function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); }
 
 function showRoutine(id, el) {
@@ -2358,7 +2427,7 @@ var wbDefaultSections = [
 
 var WB_OTHER = '__other__';
 var wbOptionsBySection = {
-  'Treatment/ Rehab': ['Recovery/ Off','Recovery','Rehab','Plyo','No Rehab','Massage','Dry Needling','MFD','BFR'],
+  'Treatment/ Rehab': ['Recovery/ Off','Recovery','Rehab','Plyo','No Rehab'],
   'Strength & Conditioning': ['Off','Lower Body','Upper Body','Full Body','Mobility Only'],
   'Warm-Up': ['T-Spine','Foam Roll','Hip Mobility','Stretch','Banded Stretch','Dynamic Warm-Up'],
   'Pre-Throwing': ['Bands','Pre Throw Bands','Rev Throws','Dynamic Warm-Up'],
@@ -2815,7 +2884,7 @@ function checkClinCode(prefix) {
 function clinUnlockAll() {
   sessionStorage.setItem('aamClinUnlocked', '1');
   ensureDocxLoaded();
-  ['tb', 'rj'].forEach(function(prefix) {
+  ['tb', 'rj', 'wb'].forEach(function(prefix) {
     var gate = document.getElementById(prefix + '-gate');
     var content = document.getElementById(prefix + '-content');
     if (gate) gate.style.display = 'none';
@@ -2825,7 +2894,7 @@ function clinUnlockAll() {
 
 function tbInitGate() {
   if (sessionStorage.getItem('aamClinUnlocked') === '1') clinUnlockAll();
-  ['tb', 'rj'].forEach(function(prefix) {
+  ['tb', 'rj', 'wb'].forEach(function(prefix) {
     var inp = document.getElementById(prefix + '-code-input');
     if (inp) inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') checkClinCode(prefix); });
   });

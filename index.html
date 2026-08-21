@@ -85,6 +85,11 @@
 .acct-msg.success { background: rgba(76,128,98,0.15); color: #7ADB9E; }
 .acct-loggedin-card { background: #1A2F4E; border-radius: 6px; padding: 30px; max-width: 380px; margin: 10px auto; text-align: center; }
 .acct-role-badge { display: inline-block; background: #C9A84C; color: #0F1E35; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 4px 12px; border-radius: 12px; margin-top: 8px; }
+.acct-team-card { background: #fff; border: 1px solid #E8E4DC; border-radius: 4px; padding: 14px 16px; margin-bottom: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+.acct-team-card:hover { border-color: #C9A84C; background: #FDFBF4; }
+.acct-team-card-name { font-size: 14px; font-weight: 700; color: #1C1C1E; }
+.acct-team-card-count { font-size: 12px; color: #7A7A85; margin-top: 2px; }
+.acct-team-card-arrow { color: #C9A84C; font-size: 18px; }
 .acct-linked-card { background: #fff; border: 1px solid #E8E4DC; border-radius: 4px; padding: 12px 14px; margin-bottom: 8px; font-size: 13px; color: #1C1C1E; }
 .acct-code-pill { display: inline-block; background: #FDF8DC; color: #7A6000; font-weight: 700; letter-spacing: 1px; padding: 3px 10px; border-radius: 12px; font-family: monospace; font-size: 13px; }
 .acct-linked-yes { color: #1A6A1A; font-size: 12px; font-weight: 700; }
@@ -2175,27 +2180,34 @@ body { font-family: Arial, sans-serif; background: #0F1E35; color: #fff; }
     </div>
 
     <div id="acct-coach-panel" style="display:none">
-      <div class="h2">My Roster</div>
+      <div class="h2">My Teams</div>
 
-      <div id="acct-team-setup">
+      <div id="acct-onboarding-note" style="display:none">
         <div class="tool-form" style="background:#FDF8DC;border-left:4px solid #C9A84C">
           <strong style="color:#7A6000;font-size:13px;letter-spacing:0.5px">GETTING STARTED</strong>
           <ol style="margin:10px 0 0 18px;padding:0;font-size:13px;line-height:1.9;color:#4A4A52">
-            <li>Create your team below</li>
+            <li>Create a team below (add one per age group/roster you coach &mdash; there's no limit)</li>
             <li>Add each athlete by name &mdash; you'll get a 6-character join code for each one</li>
             <li>Text or email that code to the athlete or their parent</li>
             <li>They sign up (choosing Athlete or Parent) and enter the code to link their account</li>
             <li>Build their weekly program in the Clinical tools &mdash; it shows up on their phone automatically</li>
           </ol>
         </div>
-        <div class="tool-form">
-          <div class="form-row"><label class="form-label">Team Name</label><input type="text" class="form-input" id="acct-team-name" placeholder="e.g. Marek 14U Black"></div>
-          <button class="btn-primary" onclick="acctCreateTeam()">Create Team</button>
+      </div>
+
+      <div id="acct-team-list-view">
+        <div id="acct-team-list"></div>
+        <div class="tool-form" style="margin-top:16px">
+          <div class="form-row-2">
+            <div><label class="form-label">New Team Name</label><input type="text" class="form-input" id="acct-team-name" placeholder="e.g. Marek 14U Black"></div>
+            <div style="display:flex;align-items:flex-end"><button class="btn-primary" onclick="acctCreateTeam()" style="width:100%">+ Add Team</button></div>
+          </div>
         </div>
       </div>
 
       <div id="acct-roster-view" style="display:none">
-        <div style="color:#7A7A85;font-size:13px;margin-bottom:14px" id="acct-team-name-display"></div>
+        <button class="btn-secondary" onclick="acctBackToTeamList()" style="margin-bottom:14px">&larr; All Teams</button>
+        <div class="h2" id="acct-team-name-display" style="margin-top:0"></div>
         <div class="tb-privacy-note" style="margin-bottom:14px"><strong>Tip:</strong> share each athlete's join code with them or their parent so they can link their account and see their program.</div>
         <div class="tb-table-wrap">
           <table class="tbl clin-table" id="acct-roster-table">
@@ -2782,18 +2794,28 @@ async function wbPopulateAthleteDropdown() {
   var role = user.user_metadata && user.user_metadata.role;
   if (role !== 'coach') return;
 
-  var teamRes = await sb.from('teams').select('id').eq('coach_id', user.id).limit(1).maybeSingle();
-  if (!teamRes.data) return;
-  var athRes = await sb.from('athletes').select('id, full_name').eq('team_id', teamRes.data.id).order('full_name');
-  if (!athRes.data || !athRes.data.length) return;
+  var teamsRes = await sb.from('teams').select('id, name').eq('coach_id', user.id).order('name');
+  if (!teamsRes.data || !teamsRes.data.length) return;
+
+  var athRes = await sb.from('athletes').select('id, full_name, team_id').order('full_name');
+  if (!athRes.data) return;
 
   while (sel.options.length > 1) sel.remove(1);
-  athRes.data.forEach(function(a) {
-    var opt = document.createElement('option');
-    opt.value = a.id;
-    opt.textContent = a.full_name;
-    sel.appendChild(opt);
+
+  teamsRes.data.forEach(function(t) {
+    var teamAthletes = athRes.data.filter(function(a) { return a.team_id === t.id; });
+    if (!teamAthletes.length) return;
+    var group = document.createElement('optgroup');
+    group.label = t.name;
+    teamAthletes.forEach(function(a) {
+      var opt = document.createElement('option');
+      opt.value = a.id;
+      opt.textContent = a.full_name;
+      group.appendChild(opt);
+    });
+    sel.appendChild(group);
   });
+
   assignRow.style.display = 'block';
 }
 
@@ -4435,7 +4457,7 @@ function acctRenderLoggedIn(user) {
 
   if (role !== 'coach') clinRelockAll();
 
-  if (role === 'coach') acctLoadCoachTeam();
+  if (role === 'coach') acctLoadTeamList();
   else if (role === 'athlete' || role === 'parent') acctLoadLinkedAthletes();
 }
 
@@ -4447,24 +4469,53 @@ async function acctCreateTeam() {
   var user = (await sb.auth.getUser()).data.user;
   var res = await sb.from('teams').insert({ coach_id: user.id, name: name }).select().single();
   if (res.error) { alert(res.error.message); return; }
-  acctLoadCoachTeam();
+  document.getElementById('acct-team-name').value = '';
+  acctLoadTeamList();
 }
 
-async function acctLoadCoachTeam() {
+async function acctLoadTeamList() {
   var sb = getSb();
   if (!sb) return;
   var user = (await sb.auth.getUser()).data.user;
-  var teamRes = await sb.from('teams').select('*').eq('coach_id', user.id).limit(1).maybeSingle();
-  if (teamRes.error || !teamRes.data) {
-    document.getElementById('acct-team-setup').style.display = 'block';
-    document.getElementById('acct-roster-view').style.display = 'none';
+  var teamsRes = await sb.from('teams').select('id, name').eq('coach_id', user.id).order('created_at');
+  var listEl = document.getElementById('acct-team-list');
+  var onboardEl = document.getElementById('acct-onboarding-note');
+
+  document.getElementById('acct-team-list-view').style.display = 'block';
+  document.getElementById('acct-roster-view').style.display = 'none';
+
+  if (teamsRes.error || !teamsRes.data || !teamsRes.data.length) {
+    listEl.innerHTML = '';
+    onboardEl.style.display = 'block';
     return;
   }
-  document.getElementById('acct-team-setup').style.display = 'none';
+  onboardEl.style.display = 'none';
+
+  var countsRes = await sb.from('athletes').select('team_id');
+  var counts = {};
+  if (countsRes.data) {
+    countsRes.data.forEach(function(a) { counts[a.team_id] = (counts[a.team_id] || 0) + 1; });
+  }
+
+  listEl.innerHTML = teamsRes.data.map(function(t) {
+    var n = counts[t.id] || 0;
+    return '<div class="acct-team-card" onclick="acctSelectTeam(\'' + t.id + '\', ' + JSON.stringify(t.name) + ')">' +
+      '<div><div class="acct-team-card-name">' + t.name + '</div><div class="acct-team-card-count">' + n + ' athlete' + (n === 1 ? '' : 's') + '</div></div>' +
+      '<div class="acct-team-card-arrow">&rsaquo;</div></div>';
+  }).join('');
+}
+
+function acctSelectTeam(teamId, teamName) {
+  window._acctTeamId = teamId;
+  document.getElementById('acct-team-list-view').style.display = 'none';
   document.getElementById('acct-roster-view').style.display = 'block';
-  document.getElementById('acct-team-name-display').textContent = teamRes.data.name;
-  window._acctTeamId = teamRes.data.id;
-  acctLoadRoster(teamRes.data.id);
+  document.getElementById('acct-team-name-display').textContent = teamName;
+  acctLoadRoster(teamId);
+}
+
+function acctBackToTeamList() {
+  window._acctTeamId = null;
+  acctLoadTeamList();
 }
 
 async function acctLoadRoster(teamId) {
